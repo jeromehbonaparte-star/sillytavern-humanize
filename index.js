@@ -12,8 +12,10 @@ import {
     saveChatDebounced,
 } from '../../../../script.js';
 
-const extensionName = 'Humanize';
-const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
+// Extension name must include 'third-party/' prefix and match the folder name
+const extensionName = 'third-party/sillytavern-humanize';
+const extensionFolderPath = `scripts/extensions/${extensionName}`;
+const settingsKey = 'humanize'; // Key for extension_settings
 
 const DEFAULT_PROMPT = `Rewrite the current output. The conversation should flow more naturally and the dialogue should be more human-like, with the characters not being too logical or robotic. Keep the same general content and meaning, but make it sound more natural.
 
@@ -29,20 +31,20 @@ const defaultSettings = {
  * Load extension settings
  */
 function loadSettings() {
-    extension_settings[extensionName] = extension_settings[extensionName] || {};
+    extension_settings[settingsKey] = extension_settings[settingsKey] || {};
 
-    if (Object.keys(extension_settings[extensionName]).length === 0) {
-        Object.assign(extension_settings[extensionName], defaultSettings);
+    if (Object.keys(extension_settings[settingsKey]).length === 0) {
+        Object.assign(extension_settings[settingsKey], defaultSettings);
     }
 
     // Ensure prompt exists
-    if (!extension_settings[extensionName].prompt) {
-        extension_settings[extensionName].prompt = DEFAULT_PROMPT;
+    if (!extension_settings[settingsKey].prompt) {
+        extension_settings[settingsKey].prompt = DEFAULT_PROMPT;
     }
 
     // Update UI
-    $('#humanize_enabled').prop('checked', extension_settings[extensionName].enabled);
-    $('#humanize_prompt').val(extension_settings[extensionName].prompt);
+    $('#humanize_enabled').prop('checked', extension_settings[settingsKey].enabled);
+    $('#humanize_prompt').val(extension_settings[settingsKey].prompt);
 }
 
 /**
@@ -74,7 +76,7 @@ async function humanizeMessage(messageId) {
     }
 
     // Get the prompt template
-    const promptTemplate = extension_settings[extensionName].prompt || DEFAULT_PROMPT;
+    const promptTemplate = extension_settings[settingsKey].prompt || DEFAULT_PROMPT;
     const fullPrompt = promptTemplate.replace('{{message}}', originalContent);
 
     // Show processing toast
@@ -130,7 +132,7 @@ async function humanizeMessage(messageId) {
  * @param {number} messageId - The message index
  */
 function addHumanizeButton(messageId) {
-    if (!extension_settings[extensionName]?.enabled) return;
+    if (!extension_settings[settingsKey]?.enabled) return;
 
     const messageBlock = $(`.mes[mesid="${messageId}"]`);
     if (messageBlock.length === 0) return;
@@ -165,7 +167,7 @@ function addHumanizeButton(messageId) {
  * Add humanize buttons to all existing messages
  */
 function addButtonsToAllMessages() {
-    if (!extension_settings[extensionName]?.enabled) return;
+    if (!extension_settings[settingsKey]?.enabled) return;
 
     $('.mes').each(function () {
         const messageId = parseInt($(this).attr('mesid'));
@@ -186,7 +188,7 @@ function removeAllButtons() {
  * Restore default prompt
  */
 function restoreDefaultPrompt() {
-    extension_settings[extensionName].prompt = DEFAULT_PROMPT;
+    extension_settings[settingsKey].prompt = DEFAULT_PROMPT;
     $('#humanize_prompt').val(DEFAULT_PROMPT);
     saveSettingsDebounced();
     toastr.success('Default prompt restored', 'Humanize');
@@ -197,7 +199,7 @@ function restoreDefaultPrompt() {
  */
 function onEnabledChange() {
     const enabled = $('#humanize_enabled').prop('checked');
-    extension_settings[extensionName].enabled = enabled;
+    extension_settings[settingsKey].enabled = enabled;
     saveSettingsDebounced();
 
     if (enabled) {
@@ -223,7 +225,7 @@ jQuery(async () => {
         $('#humanize_enabled').on('change', onEnabledChange);
 
         $('#humanize_prompt').on('input', function () {
-            extension_settings[extensionName].prompt = $(this).val();
+            extension_settings[settingsKey].prompt = $(this).val();
             saveSettingsDebounced();
         });
 
