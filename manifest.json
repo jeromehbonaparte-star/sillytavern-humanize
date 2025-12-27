@@ -1,0 +1,12 @@
+{
+    "display_name": "Humanize",
+    "loading_order": 100,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "jeromehbonaparte-star",
+    "version": "1.0.0",
+    "homePage": "https://github.com/jeromehbonaparte-star/sillytavern-humanize",
+    "auto_update": true
+}

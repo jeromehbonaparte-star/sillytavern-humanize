@@ -1,0 +1,86 @@
+/* Humanize Extension Styles */
+
+/* Settings Panel */
+.humanize-settings {
+    margin-top: 10px;
+}
+
+.humanize-settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.humanize-prompt-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.humanize-prompt-section label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.humanize-hint {
+    color: var(--SmartThemeQuoteColor, #888);
+    font-style: italic;
+}
+
+#humanize_prompt {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.humanize-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+#humanize_restore_default {
+    flex-shrink: 0;
+}
+
+/* Humanize Button on Messages */
+.humanize-button {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.humanize-button:hover {
+    opacity: 1;
+    color: var(--SmartThemeBodyColor, #a865e3);
+    transform: scale(1.1);
+}
+
+.humanize-button.processing {
+    opacity: 0.5;
+    cursor: wait;
+    animation: humanize-pulse 1.5s ease-in-out infinite;
+}
+
+.humanize-button.processing:hover {
+    transform: none;
+}
+
+@keyframes humanize-pulse {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Toast customization for Humanize */
+.toast-info .toast-title:contains("Humanize"),
+.toast-success .toast-title:contains("Humanize"),
+.toast-warning .toast-title:contains("Humanize"),
+.toast-error .toast-title:contains("Humanize") {
+    font-weight: bold;
+}
