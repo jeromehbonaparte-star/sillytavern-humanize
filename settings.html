@@ -1,0 +1,30 @@
+<div>
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b><i class="fa-solid fa-wand-magic-sparkles"></i> Humanize</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+            <label class="checkbox_label" for="humanize_enabled">
+                <input type="checkbox" id="humanize_enabled" />
+                <span>Enable Humanize</span>
+            </label>
+
+            <div class="humanize-prompt-section" style="margin-top: 10px;">
+                <label for="humanize_prompt">
+                    <span>Humanize Prompt</span>
+                </label>
+                <small class="notes">Use {{message}} as placeholder for the original message</small>
+                <textarea id="humanize_prompt" class="text_pole textarea_compact" rows="6" placeholder="Enter your humanize prompt..."></textarea>
+            </div>
+
+            <div style="margin-top: 10px;">
+                <input type="button" id="humanize_restore_default" class="menu_button" value="Restore Default" />
+            </div>
+
+            <small class="notes" style="margin-top: 10px; display: block;">
+                Click the <i class="fa-solid fa-wand-magic-sparkles"></i> button on any AI message to humanize it.
+            </small>
+        </div>
+    </div>
+</div>

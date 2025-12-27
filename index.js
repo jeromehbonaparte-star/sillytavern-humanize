@@ -1,6 +1,7 @@
 import {
     extension_settings,
     getContext,
+    renderExtensionTemplateAsync,
     saveSettingsDebounced,
 } from '../../../extensions.js';
 
@@ -8,8 +9,7 @@ import {
     eventSource,
     event_types,
     generateQuietPrompt,
-    saveChat,
-    messageFormatting,
+    saveChatDebounced,
 } from '../../../../script.js';
 
 const extensionName = 'Humanize';
@@ -46,19 +46,6 @@ function loadSettings() {
 }
 
 /**
- * Show a toast notification
- * @param {string} message - Message to display
- * @param {string} type - Type of toast ('info', 'success', 'warning', 'error')
- */
-function showToast(message, type = 'info') {
-    if (typeof toastr !== 'undefined') {
-        toastr[type](message, 'Humanize');
-    } else {
-        console.log(`[Humanize] ${type}: ${message}`);
-    }
-}
-
-/**
  * Humanize a message
  * @param {number} messageId - The message index to humanize
  */
@@ -67,7 +54,7 @@ async function humanizeMessage(messageId) {
     const chat = context.chat;
 
     if (!chat || !chat[messageId]) {
-        showToast('Message not found', 'error');
+        toastr.error('Message not found', 'Humanize');
         return;
     }
 
@@ -75,14 +62,14 @@ async function humanizeMessage(messageId) {
 
     // Only allow humanizing AI messages
     if (message.is_user) {
-        showToast('Can only humanize AI messages', 'warning');
+        toastr.warning('Can only humanize AI messages', 'Humanize');
         return;
     }
 
     const originalContent = message.mes;
 
     if (!originalContent || originalContent.trim() === '') {
-        showToast('Message is empty', 'warning');
+        toastr.warning('Message is empty', 'Humanize');
         return;
     }
 
@@ -91,46 +78,50 @@ async function humanizeMessage(messageId) {
     const fullPrompt = promptTemplate.replace('{{message}}', originalContent);
 
     // Show processing toast
-    showToast('Rewriting message...', 'info');
+    toastr.info('Rewriting message...', 'Humanize', { timeOut: 0, extendedTimeOut: 0 });
 
     try {
         // Disable the humanize button during processing
-        const button = $(`.humanize-button[data-message-id="${messageId}"]`);
-        button.prop('disabled', true).addClass('processing');
+        const button = $(`.humanize-msg-btn[data-message-id="${messageId}"]`);
+        button.addClass('disabled');
 
         // Generate the humanized response
         const humanizedText = await generateQuietPrompt(fullPrompt, false, false);
 
+        // Clear the processing toast
+        toastr.clear();
+
         if (!humanizedText || humanizedText.trim() === '') {
-            showToast('Failed to generate humanized text', 'error');
-            button.prop('disabled', false).removeClass('processing');
+            toastr.error('Failed to generate humanized text', 'Humanize');
+            button.removeClass('disabled');
             return;
         }
 
         // Update the message in chat
         chat[messageId].mes = humanizedText;
 
-        // Update the displayed message
-        const messageBlock = $(`#chat .mes[mesid="${messageId}"]`);
-        messageBlock.find('.mes_text').html(messageFormatting(
-            humanizedText,
-            message.name,
-            message.is_system,
-            message.is_user,
-            messageId
-        ));
+        // Update the displayed message - find and update the mes_text div
+        const messageBlock = $(`.mes[mesid="${messageId}"]`);
+        if (messageBlock.length) {
+            // Use SillyTavern's built-in message formatting if available
+            const mesTextElement = messageBlock.find('.mes_text');
+            if (mesTextElement.length) {
+                mesTextElement.html(humanizedText);
+            }
+        }
 
         // Save the chat
-        await saveChat();
+        saveChatDebounced();
 
-        showToast('Message humanized successfully!', 'success');
-        button.prop('disabled', false).removeClass('processing');
+        toastr.success('Message humanized!', 'Humanize');
+        button.removeClass('disabled');
 
     } catch (error) {
         console.error('[Humanize] Error:', error);
-        showToast('Error humanizing message: ' + error.message, 'error');
-        const button = $(`.humanize-button[data-message-id="${messageId}"]`);
-        button.prop('disabled', false).removeClass('processing');
+        toastr.clear();
+        toastr.error('Error: ' + error.message, 'Humanize');
+        const button = $(`.humanize-msg-btn[data-message-id="${messageId}"]`);
+        button.removeClass('disabled');
     }
 }
 
@@ -139,8 +130,9 @@ async function humanizeMessage(messageId) {
  * @param {number} messageId - The message index
  */
 function addHumanizeButton(messageId) {
-    const messageBlock = $(`#chat .mes[mesid="${messageId}"]`);
+    if (!extension_settings[extensionName]?.enabled) return;
 
+    const messageBlock = $(`.mes[mesid="${messageId}"]`);
     if (messageBlock.length === 0) return;
 
     // Check if it's an AI message (not user message)
@@ -148,24 +140,19 @@ function addHumanizeButton(messageId) {
     if (isUser) return;
 
     // Check if button already exists
-    if (messageBlock.find('.humanize-button').length > 0) return;
+    if (messageBlock.find('.humanize-msg-btn').length > 0) return;
 
     // Find the extra buttons container
     const extraButtons = messageBlock.find('.extraMesButtons');
-
     if (extraButtons.length === 0) return;
 
     // Create the humanize button
-    const humanizeButton = $(`
-        <div class="humanize-button mes_button fa-solid fa-wand-magic-sparkles interactable"
-             title="Humanize this message"
-             data-message-id="${messageId}">
-        </div>
-    `);
+    const humanizeButton = $(`<div class="humanize-msg-btn mes_button fa-solid fa-wand-magic-sparkles interactable" title="Humanize this message" data-message-id="${messageId}"></div>`);
 
     // Add click handler
-    humanizeButton.on('click', function(e) {
+    humanizeButton.on('click', function (e) {
         e.stopPropagation();
+        if ($(this).hasClass('disabled')) return;
         const msgId = parseInt($(this).data('message-id'));
         humanizeMessage(msgId);
     });
@@ -178,12 +165,21 @@ function addHumanizeButton(messageId) {
  * Add humanize buttons to all existing messages
  */
 function addButtonsToAllMessages() {
-    $('#chat .mes').each(function() {
+    if (!extension_settings[extensionName]?.enabled) return;
+
+    $('.mes').each(function () {
         const messageId = parseInt($(this).attr('mesid'));
         if (!isNaN(messageId)) {
             addHumanizeButton(messageId);
         }
     });
+}
+
+/**
+ * Remove all humanize buttons
+ */
+function removeAllButtons() {
+    $('.humanize-msg-btn').remove();
 }
 
 /**
@@ -193,105 +189,64 @@ function restoreDefaultPrompt() {
     extension_settings[extensionName].prompt = DEFAULT_PROMPT;
     $('#humanize_prompt').val(DEFAULT_PROMPT);
     saveSettingsDebounced();
-    showToast('Default prompt restored', 'success');
+    toastr.success('Default prompt restored', 'Humanize');
 }
 
 /**
- * Create the settings HTML
+ * Handle extension enable/disable toggle
  */
-function createSettingsHtml() {
-    const settingsHtml = `
-        <div id="humanize_settings" class="humanize-settings">
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <b>Humanize</b>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <div class="humanize-settings-content">
-                        <label class="checkbox_label" for="humanize_enabled">
-                            <input type="checkbox" id="humanize_enabled" />
-                            <span>Enable Humanize</span>
-                        </label>
+function onEnabledChange() {
+    const enabled = $('#humanize_enabled').prop('checked');
+    extension_settings[extensionName].enabled = enabled;
+    saveSettingsDebounced();
 
-                        <div class="humanize-prompt-section">
-                            <label for="humanize_prompt">
-                                <span>Humanize Prompt</span>
-                                <small class="humanize-hint">Use {{message}} as placeholder for the original message</small>
-                            </label>
-                            <textarea id="humanize_prompt" class="text_pole textarea_compact" rows="6" placeholder="Enter your humanize prompt..."></textarea>
-                        </div>
-
-                        <div class="humanize-buttons">
-                            <input type="button" id="humanize_restore_default" class="menu_button" value="Restore Default" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    return settingsHtml;
+    if (enabled) {
+        addButtonsToAllMessages();
+    } else {
+        removeAllButtons();
+    }
 }
 
 /**
  * Initialize the extension
  */
 jQuery(async () => {
-    // Add settings panel to the extensions settings area
-    const settingsContainer = $('#extensions_settings2');
-    if (settingsContainer.length === 0) {
-        console.error('[Humanize] Could not find extensions settings container');
-        return;
+    try {
+        // Load settings HTML template
+        const settingsHtml = await renderExtensionTemplateAsync(extensionName, 'settings');
+        $('#extensions_settings2').append(settingsHtml);
+
+        // Load settings
+        loadSettings();
+
+        // Event handlers for settings
+        $('#humanize_enabled').on('change', onEnabledChange);
+
+        $('#humanize_prompt').on('input', function () {
+            extension_settings[extensionName].prompt = $(this).val();
+            saveSettingsDebounced();
+        });
+
+        $('#humanize_restore_default').on('click', restoreDefaultPrompt);
+
+        // Register event listeners for messages
+        eventSource.on(event_types.CHAT_CHANGED, () => {
+            setTimeout(addButtonsToAllMessages, 500);
+        });
+
+        eventSource.on(event_types.MESSAGE_RECEIVED, (messageId) => {
+            setTimeout(() => addHumanizeButton(messageId), 300);
+        });
+
+        eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, (messageId) => {
+            setTimeout(() => addHumanizeButton(messageId), 100);
+        });
+
+        // Initial button addition
+        setTimeout(addButtonsToAllMessages, 1000);
+
+        console.log('[Humanize] Extension loaded successfully');
+    } catch (error) {
+        console.error('[Humanize] Failed to initialize:', error);
     }
-
-    settingsContainer.append(createSettingsHtml());
-
-    // Load settings
-    loadSettings();
-
-    // Event handlers for settings
-    $('#humanize_enabled').on('change', function() {
-        extension_settings[extensionName].enabled = $(this).prop('checked');
-        saveSettingsDebounced();
-    });
-
-    $('#humanize_prompt').on('input', function() {
-        extension_settings[extensionName].prompt = $(this).val();
-        saveSettingsDebounced();
-    });
-
-    $('#humanize_restore_default').on('click', restoreDefaultPrompt);
-
-    // Add buttons to existing messages on chat load
-    eventSource.on(event_types.CHAT_CHANGED, () => {
-        setTimeout(addButtonsToAllMessages, 300);
-    });
-
-    // Add button to new messages
-    eventSource.on(event_types.MESSAGE_RECEIVED, (messageId) => {
-        setTimeout(() => addHumanizeButton(messageId), 300);
-    });
-
-    eventSource.on(event_types.MESSAGE_SENT, (messageId) => {
-        setTimeout(() => addHumanizeButton(messageId), 300);
-    });
-
-    // Also listen for when messages are rendered
-    eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, (messageId) => {
-        setTimeout(() => addHumanizeButton(messageId), 100);
-    });
-
-    eventSource.on(event_types.USER_MESSAGE_RENDERED, (messageId) => {
-        // User messages don't need the button, but trigger a refresh
-        setTimeout(addButtonsToAllMessages, 100);
-    });
-
-    // Initial button addition with longer delay to ensure DOM is ready
-    setTimeout(addButtonsToAllMessages, 1000);
-
-    console.log('[Humanize] Extension loaded successfully');
 });
-
-// Export for potential use by other extensions
-export { humanizeMessage, DEFAULT_PROMPT };
