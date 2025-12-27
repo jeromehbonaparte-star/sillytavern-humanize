@@ -111,19 +111,27 @@ async function humanizeMessage(messageId) {
     // Show processing toast
     toastr.info('Rewriting message...', 'Humanize', { timeOut: 0, extendedTimeOut: 0 });
 
-    try {
-        // Disable the humanize button during processing
-        const button = $(`.humanize-msg-btn[data-message-id="${messageId}"]`);
-        button.addClass('disabled');
+    // Disable the humanize button during processing
+    const button = $(`.humanize-msg-btn[data-message-id="${messageId}"]`);
+    button.addClass('disabled');
 
+    console.log('[Humanize] Starting generation...');
+    console.log('[Humanize] Prompt length:', fullPrompt.length);
+    console.log('[Humanize] Context messages:', contextMessages.length);
+
+    try {
         // Generate the humanized response using object parameter syntax
         const humanizedText = await generateQuietPrompt({ quietPrompt: fullPrompt });
 
         // Clear the processing toast
         toastr.clear();
 
+        console.log('[Humanize] Response type:', typeof humanizedText);
+        console.log('[Humanize] Response length:', humanizedText ? humanizedText.length : 0);
+
         if (!humanizedText || humanizedText.trim() === '') {
-            toastr.error('Failed to generate humanized text', 'Humanize');
+            toastr.error('Empty response received. Try reducing context depth.', 'Humanize');
+            console.error('[Humanize] Empty response. Full prompt was:', fullPrompt.substring(0, 500) + '...');
             button.removeClass('disabled');
             return;
         }
@@ -149,9 +157,9 @@ async function humanizeMessage(messageId) {
 
     } catch (error) {
         console.error('[Humanize] Error:', error);
+        console.error('[Humanize] Error stack:', error.stack);
         toastr.clear();
-        toastr.error('Error: ' + error.message, 'Humanize');
-        const button = $(`.humanize-msg-btn[data-message-id="${messageId}"]`);
+        toastr.error('Error: ' + (error.message || 'Unknown error'), 'Humanize');
         button.removeClass('disabled');
     }
 }
