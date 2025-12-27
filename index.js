@@ -2,7 +2,6 @@ import {
     extension_settings,
     getContext,
     renderExtensionTemplateAsync,
-    saveSettingsDebounced,
 } from '../../../extensions.js';
 
 import {
@@ -10,6 +9,7 @@ import {
     event_types,
     generateQuietPrompt,
     saveChatDebounced,
+    saveSettingsDebounced,
 } from '../../../../script.js';
 
 // Extension name must include 'third-party/' prefix and match the folder name
