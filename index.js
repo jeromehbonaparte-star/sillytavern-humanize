@@ -7,7 +7,7 @@ import {
 import {
     eventSource,
     event_types,
-    generateQuietPrompt,
+    generateRaw,
     saveChatDebounced,
     saveSettingsDebounced,
     messageFormatting,
@@ -121,8 +121,8 @@ async function humanizeMessage(messageId) {
     console.log('[Humanize] Context messages:', contextMessages.length);
 
     try {
-        // Generate the humanized response using object parameter syntax
-        const humanizedText = await generateQuietPrompt({ quietPrompt: fullPrompt });
+        // Generate the humanized response using generateRaw
+        const humanizedText = await generateRaw({ prompt: fullPrompt, quietToLoud: false });
 
         // Clear the processing toast
         toastr.clear();
