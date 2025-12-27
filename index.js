@@ -9,9 +9,8 @@ import {
     event_types,
     generateQuietPrompt,
     saveChat,
+    messageFormatting,
 } from '../../../../script.js';
-
-import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 
 const extensionName = 'Humanize';
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
@@ -144,11 +143,9 @@ function addHumanizeButton(messageId) {
 
     if (messageBlock.length === 0) return;
 
-    // Check if it's an AI message
-    const context = getContext();
-    const message = context.chat?.[messageId];
-
-    if (!message || message.is_user) return;
+    // Check if it's an AI message (not user message)
+    const isUser = messageBlock.attr('is_user') === 'true';
+    if (isUser) return;
 
     // Check if button already exists
     if (messageBlock.find('.humanize-button').length > 0) return;
@@ -160,7 +157,7 @@ function addHumanizeButton(messageId) {
 
     // Create the humanize button
     const humanizeButton = $(`
-        <div class="humanize-button mes_button fa-solid fa-wand-magic-sparkles"
+        <div class="humanize-button mes_button fa-solid fa-wand-magic-sparkles interactable"
              title="Humanize this message"
              data-message-id="${messageId}">
         </div>
@@ -181,14 +178,12 @@ function addHumanizeButton(messageId) {
  * Add humanize buttons to all existing messages
  */
 function addButtonsToAllMessages() {
-    const context = getContext();
-    const chat = context.chat;
-
-    if (!chat) return;
-
-    for (let i = 0; i < chat.length; i++) {
-        addHumanizeButton(i);
-    }
+    $('#chat .mes').each(function() {
+        const messageId = parseInt($(this).attr('mesid'));
+        if (!isNaN(messageId)) {
+            addHumanizeButton(messageId);
+        }
+    });
 }
 
 /**
@@ -243,8 +238,13 @@ function createSettingsHtml() {
  * Initialize the extension
  */
 jQuery(async () => {
-    // Add settings panel
-    const settingsContainer = $('#extensions_settings');
+    // Add settings panel to the extensions settings area
+    const settingsContainer = $('#extensions_settings2');
+    if (settingsContainer.length === 0) {
+        console.error('[Humanize] Could not find extensions settings container');
+        return;
+    }
+
     settingsContainer.append(createSettingsHtml());
 
     // Load settings
@@ -265,22 +265,32 @@ jQuery(async () => {
 
     // Add buttons to existing messages on chat load
     eventSource.on(event_types.CHAT_CHANGED, () => {
-        setTimeout(addButtonsToAllMessages, 100);
+        setTimeout(addButtonsToAllMessages, 300);
     });
 
     // Add button to new messages
     eventSource.on(event_types.MESSAGE_RECEIVED, (messageId) => {
-        setTimeout(() => addHumanizeButton(messageId), 100);
+        setTimeout(() => addHumanizeButton(messageId), 300);
     });
 
     eventSource.on(event_types.MESSAGE_SENT, (messageId) => {
+        setTimeout(() => addHumanizeButton(messageId), 300);
+    });
+
+    // Also listen for when messages are rendered
+    eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, (messageId) => {
         setTimeout(() => addHumanizeButton(messageId), 100);
     });
 
-    // Initial button addition
-    setTimeout(addButtonsToAllMessages, 500);
+    eventSource.on(event_types.USER_MESSAGE_RENDERED, (messageId) => {
+        // User messages don't need the button, but trigger a refresh
+        setTimeout(addButtonsToAllMessages, 100);
+    });
 
-    console.log('[Humanize] Extension loaded');
+    // Initial button addition with longer delay to ensure DOM is ready
+    setTimeout(addButtonsToAllMessages, 1000);
+
+    console.log('[Humanize] Extension loaded successfully');
 });
 
 // Export for potential use by other extensions
