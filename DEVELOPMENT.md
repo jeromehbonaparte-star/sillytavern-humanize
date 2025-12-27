@@ -124,10 +124,30 @@ toastr.clear();
 
 ## Generating AI Responses
 
-Use `generateQuietPrompt` to get AI response without adding to chat:
+Use `generateQuietPrompt` to get AI response without adding to chat.
+
+**Important:** Use object parameter syntax (positional arguments are deprecated):
 
 ```javascript
+// CORRECT - object parameter syntax
+const response = await generateQuietPrompt({ quietPrompt: promptText });
+
+// WRONG - old positional arguments (deprecated, may return empty)
 const response = await generateQuietPrompt(promptText, false, false);
+```
+
+Available options:
+```javascript
+await generateQuietPrompt({
+    quietPrompt: 'Your prompt here',
+    quietToLoud: false,        // Include in chat context
+    skipWIAN: false,           // Skip World Info/Author's Note
+    quietImage: null,          // Image for vision models
+    quietName: null,           // Override character name
+    responseLength: null,      // Custom response length
+    forceChId: null,           // Force character ID
+    jsonSchema: null,          // JSON schema for structured output
+});
 ```
 
 ## manifest.json

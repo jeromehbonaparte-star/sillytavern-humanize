@@ -87,8 +87,8 @@ async function humanizeMessage(messageId) {
         const button = $(`.humanize-msg-btn[data-message-id="${messageId}"]`);
         button.addClass('disabled');
 
-        // Generate the humanized response
-        const humanizedText = await generateQuietPrompt(fullPrompt, false, false);
+        // Generate the humanized response using object parameter syntax
+        const humanizedText = await generateQuietPrompt({ quietPrompt: fullPrompt });
 
         // Clear the processing toast
         toastr.clear();
