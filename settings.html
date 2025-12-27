@@ -10,12 +10,20 @@
                 <span>Enable Humanize</span>
             </label>
 
+            <div style="margin-top: 10px;">
+                <label for="humanize_context_depth">
+                    <span>Context Depth</span>
+                </label>
+                <small class="notes">Number of previous messages to include as context (0 = no context)</small>
+                <input type="number" id="humanize_context_depth" class="text_pole" min="0" max="50" value="10" style="width: 80px;" />
+            </div>
+
             <div class="humanize-prompt-section" style="margin-top: 10px;">
                 <label for="humanize_prompt">
                     <span>Humanize Prompt</span>
                 </label>
-                <small class="notes">Use {{message}} as placeholder for the original message</small>
-                <textarea id="humanize_prompt" class="text_pole textarea_compact" rows="6" placeholder="Enter your humanize prompt..."></textarea>
+                <small class="notes">Use {{message}} for original message, {{context}} for chat history</small>
+                <textarea id="humanize_prompt" class="text_pole textarea_compact" rows="8" placeholder="Enter your humanize prompt..."></textarea>
             </div>
 
             <div style="margin-top: 10px;">

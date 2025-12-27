@@ -19,12 +19,16 @@ const settingsKey = 'humanize'; // Key for extension_settings
 
 const DEFAULT_PROMPT = `Rewrite the current output. The conversation should flow more naturally and the dialogue should be more human-like, with the characters not being too logical or robotic. Keep the same general content and meaning, but make it sound more natural.
 
+Here is the conversation context leading up to this message:
+{{context}}
+
 Original message to rewrite:
 {{message}}`;
 
 const defaultSettings = {
     enabled: true,
     prompt: DEFAULT_PROMPT,
+    contextDepth: 10, // Number of messages to include as context
 };
 
 /**
@@ -42,9 +46,15 @@ function loadSettings() {
         extension_settings[settingsKey].prompt = DEFAULT_PROMPT;
     }
 
+    // Ensure contextDepth exists
+    if (extension_settings[settingsKey].contextDepth === undefined) {
+        extension_settings[settingsKey].contextDepth = defaultSettings.contextDepth;
+    }
+
     // Update UI
     $('#humanize_enabled').prop('checked', extension_settings[settingsKey].enabled);
     $('#humanize_prompt').val(extension_settings[settingsKey].prompt);
+    $('#humanize_context_depth').val(extension_settings[settingsKey].contextDepth);
 }
 
 /**
@@ -75,9 +85,28 @@ async function humanizeMessage(messageId) {
         return;
     }
 
+    // Build chat context
+    const contextDepth = extension_settings[settingsKey].contextDepth || 10;
+    const startIndex = Math.max(0, messageId - contextDepth);
+    let contextMessages = [];
+
+    for (let i = startIndex; i < messageId; i++) {
+        const msg = chat[i];
+        if (msg && msg.mes) {
+            const name = msg.is_user ? 'User' : (msg.name || 'Character');
+            contextMessages.push(`${name}: ${msg.mes}`);
+        }
+    }
+
+    const contextString = contextMessages.length > 0
+        ? contextMessages.join('\n\n')
+        : '(No previous context)';
+
     // Get the prompt template
     const promptTemplate = extension_settings[settingsKey].prompt || DEFAULT_PROMPT;
-    const fullPrompt = promptTemplate.replace('{{message}}', originalContent);
+    const fullPrompt = promptTemplate
+        .replace('{{context}}', contextString)
+        .replace('{{message}}', originalContent);
 
     // Show processing toast
     toastr.info('Rewriting message...', 'Humanize', { timeOut: 0, extendedTimeOut: 0 });
@@ -189,9 +218,11 @@ function removeAllButtons() {
  */
 function restoreDefaultPrompt() {
     extension_settings[settingsKey].prompt = DEFAULT_PROMPT;
+    extension_settings[settingsKey].contextDepth = defaultSettings.contextDepth;
     $('#humanize_prompt').val(DEFAULT_PROMPT);
+    $('#humanize_context_depth').val(defaultSettings.contextDepth);
     saveSettingsDebounced();
-    toastr.success('Default prompt restored', 'Humanize');
+    toastr.success('Defaults restored', 'Humanize');
 }
 
 /**
@@ -226,6 +257,11 @@ jQuery(async () => {
 
         $('#humanize_prompt').on('input', function () {
             extension_settings[settingsKey].prompt = $(this).val();
+            saveSettingsDebounced();
+        });
+
+        $('#humanize_context_depth').on('input', function () {
+            extension_settings[settingsKey].contextDepth = parseInt($(this).val()) || 0;
             saveSettingsDebounced();
         });
 
