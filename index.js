@@ -10,6 +10,7 @@ import {
     generateQuietPrompt,
     saveChatDebounced,
     saveSettingsDebounced,
+    messageFormatting,
 } from '../../../../script.js';
 
 // Extension name must include 'third-party/' prefix and match the folder name
@@ -28,7 +29,7 @@ Original message to rewrite:
 const defaultSettings = {
     enabled: true,
     prompt: DEFAULT_PROMPT,
-    contextDepth: 10, // Number of messages to include as context
+    contextDepth: 3, // Number of messages to include as context
 };
 
 /**
@@ -139,13 +140,20 @@ async function humanizeMessage(messageId) {
         // Update the message in chat
         chat[messageId].mes = humanizedText;
 
-        // Update the displayed message - find and update the mes_text div
+        // Update the displayed message using SillyTavern's formatter
         const messageBlock = $(`.mes[mesid="${messageId}"]`);
         if (messageBlock.length) {
-            // Use SillyTavern's built-in message formatting if available
             const mesTextElement = messageBlock.find('.mes_text');
             if (mesTextElement.length) {
-                mesTextElement.html(humanizedText);
+                // Use SillyTavern's message formatting for proper rendering
+                const formattedText = messageFormatting(
+                    humanizedText,
+                    message.name,
+                    message.is_system,
+                    message.is_user,
+                    messageId
+                );
+                mesTextElement.html(formattedText);
             }
         }
 
