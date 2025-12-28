@@ -22,15 +22,11 @@ const settingsKey = 'humanize';
 
 const DEFAULT_PROMPT = `Rewrite this message with these fixes:
 
-1. LOGIC: Ensure cause-effect, no sudden personality shifts, no deus ex machina
-2. NPC PERCEPTION: NPCs must NOT sense secrets/hidden powers. Use mundane explanations ("prodigy" not "lived before", "eccentric" not "hiding something")
-3. SHOW DON'T TELL: Replace "was scared/angry" with actions ("hands trembled", "jaw clenched"). Use active voice.
-4. DIALOGUE: No exposition dumps. Add subtext. Distinct voices. Use contractions. Remove "I see/Indeed/Very well". Use "said".
-5. PROSE: Vary sentence length. Cut filler. Strong verbs. No clichés. No vague "something". No "silence fell".
-6. PACING: Skip boring parts. Action=short sentences. Emotion=sensory detail.
-7. PITFALLS: No telepathic shortcuts. No theme explanations. No "complicated expression". Ground emotion in action.
-8. ENDINGS: Remove "And that was enough"/"Things were about to change"/falling asleep. Use hooks/revelations/mid-action cuts.
-9. HUMANIZE: Natural dialogue with contractions/fragments. No robotic speech.
+1. HUMANIZE DIALOGUE: Make characters sound like real people. No robotic tone. No overcomplicated words. Use everyday language that normal people actually use. Include contractions, sentence fragments, and natural speech patterns.
+
+2. LOGIC & COHERENCE: Ensure cause-effect makes sense. No sudden personality shifts. No contradictions. Events should flow naturally from what came before.
+
+3. NPC PERCEPTION: NPCs must NOT magically sense secrets, hidden powers, or things they couldn't possibly know. Use mundane explanations only - "talented" not "there's something about you", "prodigy" not "lived before", "eccentric" not "hiding something". No telepathic shortcuts.
 
 CONTEXT:
 {{context}}
