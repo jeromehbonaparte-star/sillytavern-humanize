@@ -50,6 +50,37 @@ const defaultSettings = {
 const MAX_PROMPT_CHARS = 32000;
 
 // ============================================================================
+// LOGGING - Writes to both console and UI panel
+// ============================================================================
+
+function log(message, type = 'info') {
+    const timestamp = new Date().toLocaleTimeString();
+    const prefix = `[${timestamp}]`;
+
+    // Console logging
+    if (type === 'error') {
+        console.error('[Humanize]', message);
+    } else if (type === 'warn') {
+        console.warn('[Humanize]', message);
+    } else {
+        console.log('[Humanize]', message);
+    }
+
+    // UI logging
+    const logPanel = $('#humanize_log');
+    if (logPanel.length) {
+        const color = type === 'error' ? '#ff6b6b' : type === 'warn' ? '#ffd93d' : type === 'success' ? '#6bcb77' : '#ccc';
+        logPanel.append(`<div style="color: ${color}">${prefix} ${message}</div>`);
+        logPanel.scrollTop(logPanel[0].scrollHeight);
+    }
+}
+
+function clearLog() {
+    $('#humanize_log').empty();
+    log('Log cleared', 'info');
+}
+
+// ============================================================================
 // SETTINGS MANAGEMENT
 // ============================================================================
 
@@ -119,7 +150,7 @@ async function improveMessage(messageId) {
 
             // Check if adding this would exceed limit
             if (contextSize + entry.length > availableForContext && availableForContext > 0) {
-                console.log('[Humanize] Context truncated to fit token limit');
+                log('Context truncated to fit token limit', 'warn');
                 break;
             }
 
@@ -145,26 +176,26 @@ async function improveMessage(messageId) {
     button.addClass('disabled');
 
     const estimatedTokens = Math.ceil(fullPrompt.length / 4);
-    console.log('[Humanize] Starting improvement...');
-    console.log('[Humanize] Prompt:', fullPrompt.length, 'chars (~' + estimatedTokens + ' tokens)');
-    console.log('[Humanize] Message:', originalContent.length, 'chars');
-    console.log('[Humanize] Context:', contextString.length, 'chars');
+    log('Starting improvement...');
+    log(`Prompt: ${fullPrompt.length} chars (~${estimatedTokens} tokens)`);
+    log(`Message: ${originalContent.length} chars`);
+    log(`Context: ${contextString.length} chars`);
 
     // Warn if still very large
     if (estimatedTokens > 10000) {
-        console.warn('[Humanize] Warning: ~' + estimatedTokens + ' tokens is large, may be slow');
+        log(`Warning: ~${estimatedTokens} tokens is large, may be slow`, 'warn');
         toastr.warning('Large message (~' + estimatedTokens + ' tokens), this may take a while...', 'Humanize');
     }
 
     try {
-        console.log('[Humanize] Calling generateRaw...');
+        log('Calling API...');
         const improvedText = await generateRaw({ prompt: fullPrompt, quietToLoud: false });
-        console.log('[Humanize] generateRaw returned:', improvedText ? `${improvedText.length} chars` : 'null/undefined');
+        log(`API returned: ${improvedText ? improvedText.length + ' chars' : 'null/undefined'}`, improvedText ? 'info' : 'error');
 
         toastr.clear();
 
         if (!improvedText || improvedText.trim() === '') {
-            console.error('[Humanize] Empty or null response received');
+            log('Empty or null response received', 'error');
             toastr.error('Empty response received. Try reducing context depth.', 'Humanize');
             button.removeClass('disabled');
             return;
@@ -190,13 +221,13 @@ async function improveMessage(messageId) {
         }
 
         saveChatDebounced();
-        console.log('[Humanize] Message updated successfully');
+        log('Message improved successfully!', 'success');
 
         toastr.success('Message improved!', 'Humanize');
         button.removeClass('disabled');
 
     } catch (error) {
-        console.error('[Humanize] Error caught:', error);
+        log(`Error: ${error.message || error}`, 'error');
         toastr.clear();
         toastr.error('Error: ' + (error.message || 'Unknown error'), 'Humanize');
         button.removeClass('disabled');
@@ -295,6 +326,7 @@ jQuery(async () => {
             saveSettingsDebounced();
         });
         $('#humanize_restore_default').on('click', restoreDefaultPrompt);
+        $('#humanize_clear_log').on('click', clearLog);
 
         // Register event listeners
         eventSource.on(event_types.CHAT_CHANGED, () => {
@@ -311,7 +343,7 @@ jQuery(async () => {
 
         setTimeout(addButtonsToAllMessages, 1000);
 
-        console.log('[Humanize] Extension loaded successfully');
+        log('Extension loaded successfully', 'success');
     } catch (error) {
         console.error('[Humanize] Failed to initialize:', error);
     }
