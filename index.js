@@ -24,9 +24,11 @@ const DEFAULT_PROMPT = `Rewrite this message with these fixes:
 
 1. HUMANIZE DIALOGUE: Make characters sound like real people. No robotic tone. No overcomplicated words. Use everyday language that normal people actually use. Include contractions, sentence fragments, and natural speech patterns.
 
-2. LOGIC & COHERENCE: Ensure cause-effect makes sense. No sudden personality shifts. No contradictions. Events should flow naturally from what came before.
+2. HUMANIZE WRITING: Prose and narration must sound natural, not AI-generated. No purple prose. No clinical or data-like language. No thesaurus words. Avoid overcomplicated vocabulary. Write simply and clearly like a human author would.
 
-3. NPC PERCEPTION: NPCs must NOT magically sense secrets, hidden powers, or things they couldn't possibly know. Use mundane explanations only - "talented" not "there's something about you", "prodigy" not "lived before", "eccentric" not "hiding something". No telepathic shortcuts.
+3. LOGIC & COHERENCE: Ensure cause-effect makes sense. No sudden personality shifts. No contradictions. Events should flow naturally from what came before.
+
+4. NPC PERCEPTION: NPCs must NOT magically sense secrets, hidden powers, or things they couldn't possibly know. Use mundane explanations only - "talented" not "there's something about you", "prodigy" not "lived before", "eccentric" not "hiding something". No telepathic shortcuts.
 
 CONTEXT:
 {{context}}
