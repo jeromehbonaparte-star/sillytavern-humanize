@@ -1,6 +1,9 @@
-/* Humanize Extension Styles */
+/* Writer Improver Extension Styles */
 
-/* Settings Panel */
+/* ============================================
+   SETTINGS PANEL
+   ============================================ */
+
 .humanize-prompt-section {
     display: flex;
     flex-direction: column;
@@ -9,24 +12,143 @@
 
 #humanize_prompt {
     resize: vertical;
-    min-height: 100px;
-    font-family: inherit;
+    min-height: 150px;
+    font-family: monospace;
+    font-size: 0.85em;
     margin-top: 5px;
 }
 
-/* Humanize Button on Messages */
-.humanize-msg-btn {
+#humanize_type_select {
+    width: 100%;
+    margin-top: 5px;
+}
+
+#humanize_type_description {
+    color: var(--SmartThemeEmColor, #a865e3);
+}
+
+/* ============================================
+   MESSAGE BUTTONS
+   ============================================ */
+
+.improve-btn-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.improve-msg-btn {
     cursor: pointer;
     transition: opacity 0.2s ease, color 0.2s ease;
 }
 
-.humanize-msg-btn:hover {
+.improve-msg-btn:hover {
     opacity: 1;
     color: var(--SmartThemeEmColor, #a865e3);
 }
 
-.humanize-msg-btn.disabled {
+.improve-msg-btn.disabled {
     opacity: 0.3;
     cursor: wait;
     pointer-events: none;
+}
+
+.improve-dropdown-btn {
+    cursor: pointer;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    padding: 0 2px;
+}
+
+.improve-dropdown-btn:hover {
+    opacity: 1;
+    color: var(--SmartThemeEmColor, #a865e3);
+}
+
+.improve-dropdown-btn.disabled {
+    opacity: 0.3;
+    cursor: wait;
+    pointer-events: none;
+}
+
+/* ============================================
+   DROPDOWN MENU
+   ============================================ */
+
+.improve-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    min-width: 200px;
+    background: var(--SmartThemeBlurTintColor, #1a1a2e);
+    border: 1px solid var(--SmartThemeBorderColor, #444);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    padding: 5px 0;
+    margin-top: 5px;
+}
+
+.improve-dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+.improve-dropdown-item:hover {
+    background: var(--SmartThemeEmColor, #a865e3);
+    color: var(--SmartThemeBodyColor, #fff);
+}
+
+.improve-dropdown-item i {
+    width: 16px;
+    text-align: center;
+    opacity: 0.8;
+}
+
+.improve-dropdown-item:hover i {
+    opacity: 1;
+}
+
+/* Run All special styling */
+.improve-dropdown-item.improve-run-all {
+    background: rgba(168, 101, 227, 0.15);
+    font-weight: 500;
+}
+
+.improve-dropdown-item.improve-run-all:hover {
+    background: var(--SmartThemeEmColor, #a865e3);
+}
+
+/* Dropdown separator */
+.improve-dropdown-separator {
+    height: 1px;
+    background: var(--SmartThemeBorderColor, #444);
+    margin: 5px 8px;
+    opacity: 0.5;
+}
+
+/* ============================================
+   UTILITY
+   ============================================ */
+
+/* Separator in settings */
+.sysHR {
+    margin: 10px 0;
+    border: none;
+    border-top: 1px solid var(--SmartThemeBorderColor, #333);
+    opacity: 0.3;
+}
+
+/* Code styling in notes */
+.notes code {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9em;
 }

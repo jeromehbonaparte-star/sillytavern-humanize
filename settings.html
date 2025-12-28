@@ -10,29 +10,84 @@
                 <span>Enable Humanize</span>
             </label>
 
+            <hr class="sysHR">
+
+            <!-- Improvement Type Selector -->
+            <div style="margin-top: 10px;">
+                <label for="humanize_type_select">
+                    <span>Improvement Type</span>
+                </label>
+                <small class="notes">Select which improvement to apply (main button uses this)</small>
+                <select id="humanize_type_select" class="text_pole">
+                    <option value="plotCoherence">1. Plot Coherence - Logical consistency</option>
+                    <option value="npcPerception">2. NPC Perception Fix - Stop telepathy</option>
+                    <option value="showDontTell">3. Show Don't Tell - Sensory details</option>
+                    <option value="dialoguePolish">4. Dialogue Polish - Subtext & variety</option>
+                    <option value="proseCraft">5. Prose Craft - Rhythm & economy</option>
+                    <option value="pacingFix">6. Pacing Fix - Scene tempo</option>
+                    <option value="pitfallChecker">7. Pitfall Checker - Anti-patterns</option>
+                    <option value="chapterEnding">8. Chapter Ending - Strong hooks</option>
+                    <option value="humanizer">9. Humanizer - Natural dialogue (Final Polish)</option>
+                </select>
+            </div>
+
+            <!-- Type Description -->
+            <div style="margin-top: 5px;">
+                <small id="humanize_type_description" class="notes" style="font-style: italic;"></small>
+            </div>
+
+            <hr class="sysHR">
+
+            <!-- Context Depth -->
             <div style="margin-top: 10px;">
                 <label for="humanize_context_depth">
                     <span>Context Depth</span>
                 </label>
                 <small class="notes">Number of previous messages to include as context (0 = no context)</small>
-                <input type="number" id="humanize_context_depth" class="text_pole" min="0" max="50" value="10" style="width: 80px;" />
+                <input type="number" id="humanize_context_depth" class="text_pole" min="0" max="50" value="3" style="width: 80px;" />
             </div>
 
+            <hr class="sysHR">
+
+            <!-- Prompt Editor -->
             <div class="humanize-prompt-section" style="margin-top: 10px;">
                 <label for="humanize_prompt">
-                    <span>Humanize Prompt</span>
+                    <span>Prompt for Selected Type</span>
                 </label>
-                <small class="notes">Use {{message}} for original message, {{context}} for chat history</small>
-                <textarea id="humanize_prompt" class="text_pole textarea_compact" rows="8" placeholder="Enter your humanize prompt..."></textarea>
+                <small class="notes">
+                    Use <code>{{message}}</code> for original message, <code>{{context}}</code> for chat history.
+                    Each improvement type has its own prompt.
+                </small>
+                <textarea id="humanize_prompt" class="text_pole textarea_compact" rows="12" placeholder="Enter your improvement prompt..."></textarea>
             </div>
 
+            <!-- Buttons -->
+            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                <input type="button" id="humanize_restore_default" class="menu_button" value="Restore This Prompt" title="Restore default prompt for the currently selected type" />
+                <input type="button" id="humanize_restore_all" class="menu_button" value="Restore All Defaults" title="Restore all prompts and settings to defaults" />
+            </div>
+
+            <hr class="sysHR">
+
+            <!-- Usage Instructions -->
             <div style="margin-top: 10px;">
-                <input type="button" id="humanize_restore_default" class="menu_button" value="Restore Default" />
+                <small class="notes">
+                    <b>How to use:</b><br>
+                    <i class="fa-solid fa-pen-fancy"></i> Main button - Apply selected improvement type<br>
+                    <i class="fa-solid fa-caret-down"></i> Dropdown arrow - Choose improvement or Run All<br>
+                    <i class="fa-solid fa-forward"></i> <b>Run All</b> - Apply all 9 improvements in order (click toast to cancel)<br><br>
+                    <b>Improvement Order:</b><br>
+                    1. <i class="fa-solid fa-diagram-project"></i> <b>Plot Coherence</b> - Fix logic first<br>
+                    2. <i class="fa-solid fa-brain"></i> <b>NPC Perception</b> - Stop telepathic NPCs<br>
+                    3. <i class="fa-solid fa-eye"></i> <b>Show Don't Tell</b> - Sensory details<br>
+                    4. <i class="fa-solid fa-comments"></i> <b>Dialogue Polish</b> - Subtext, voices<br>
+                    5. <i class="fa-solid fa-pen-fancy"></i> <b>Prose Craft</b> - Rhythm, cut filler<br>
+                    6. <i class="fa-solid fa-gauge-high"></i> <b>Pacing Fix</b> - Scene tempo<br>
+                    7. <i class="fa-solid fa-triangle-exclamation"></i> <b>Pitfall Checker</b> - Anti-patterns<br>
+                    8. <i class="fa-solid fa-flag-checkered"></i> <b>Chapter Ending</b> - Strong hooks<br>
+                    9. <i class="fa-solid fa-wand-magic-sparkles"></i> <b>Humanizer</b> - Final polish
+                </small>
             </div>
-
-            <small class="notes" style="margin-top: 10px; display: block;">
-                Click the <i class="fa-solid fa-wand-magic-sparkles"></i> button on any AI message to humanize it.
-            </small>
         </div>
     </div>
 </div>
