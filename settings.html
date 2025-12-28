@@ -12,28 +12,23 @@
 
             <hr class="sysHR">
 
-            <!-- Improvement Type Selector -->
+            <!-- Pack Selector -->
             <div style="margin-top: 10px;">
-                <label for="humanize_type_select">
-                    <span>Improvement Type</span>
+                <label for="humanize_pack_select">
+                    <span>Improvement Pack</span>
                 </label>
-                <small class="notes">Select which improvement to apply (main button uses this)</small>
-                <select id="humanize_type_select" class="text_pole">
-                    <option value="plotCoherence">1. Plot Coherence - Logical consistency</option>
-                    <option value="npcPerception">2. NPC Perception Fix - Stop telepathy</option>
-                    <option value="showDontTell">3. Show Don't Tell - Sensory details</option>
-                    <option value="dialoguePolish">4. Dialogue Polish - Subtext & variety</option>
-                    <option value="proseCraft">5. Prose Craft - Rhythm & economy</option>
-                    <option value="pacingFix">6. Pacing Fix - Scene tempo</option>
-                    <option value="pitfallChecker">7. Pitfall Checker - Anti-patterns</option>
-                    <option value="chapterEnding">8. Chapter Ending - Strong hooks</option>
-                    <option value="humanizer">9. Humanizer - Natural dialogue (Final Polish)</option>
+                <small class="notes">Select which pack to apply (main button uses this)</small>
+                <select id="humanize_pack_select" class="text_pole">
+                    <option value="storyLogic">1. Story & Logic</option>
+                    <option value="proseStyle">2. Prose & Style</option>
+                    <option value="polishEndings">3. Polish & Endings</option>
+                    <option value="humanize">4. Humanize</option>
                 </select>
             </div>
 
-            <!-- Type Description -->
+            <!-- Pack Description -->
             <div style="margin-top: 5px;">
-                <small id="humanize_type_description" class="notes" style="font-style: italic;"></small>
+                <small id="humanize_pack_description" class="notes" style="font-style: italic;"></small>
             </div>
 
             <hr class="sysHR">
@@ -52,18 +47,18 @@
             <!-- Prompt Editor -->
             <div class="humanize-prompt-section" style="margin-top: 10px;">
                 <label for="humanize_prompt">
-                    <span>Prompt for Selected Type</span>
+                    <span>Prompt for Selected Pack</span>
                 </label>
                 <small class="notes">
                     Use <code>{{message}}</code> for original message, <code>{{context}}</code> for chat history.
-                    Each improvement type has its own prompt.
+                    Each pack has its own customizable prompt.
                 </small>
                 <textarea id="humanize_prompt" class="text_pole textarea_compact" rows="12" placeholder="Enter your improvement prompt..."></textarea>
             </div>
 
             <!-- Buttons -->
             <div style="margin-top: 10px; display: flex; gap: 10px;">
-                <input type="button" id="humanize_restore_default" class="menu_button" value="Restore This Prompt" title="Restore default prompt for the currently selected type" />
+                <input type="button" id="humanize_restore_default" class="menu_button" value="Restore This Prompt" title="Restore default prompt for the currently selected pack" />
                 <input type="button" id="humanize_restore_all" class="menu_button" value="Restore All Defaults" title="Restore all prompts and settings to defaults" />
             </div>
 
@@ -73,19 +68,14 @@
             <div style="margin-top: 10px;">
                 <small class="notes">
                     <b>How to use:</b><br>
-                    <i class="fa-solid fa-pen-fancy"></i> Main button - Apply selected improvement type<br>
-                    <i class="fa-solid fa-caret-down"></i> Dropdown arrow - Choose improvement or Run All<br>
-                    <i class="fa-solid fa-forward"></i> <b>Run All</b> - Apply all 9 improvements in order (click toast to cancel)<br><br>
-                    <b>Improvement Order:</b><br>
-                    1. <i class="fa-solid fa-diagram-project"></i> <b>Plot Coherence</b> - Fix logic first<br>
-                    2. <i class="fa-solid fa-brain"></i> <b>NPC Perception</b> - Stop telepathic NPCs<br>
-                    3. <i class="fa-solid fa-eye"></i> <b>Show Don't Tell</b> - Sensory details<br>
-                    4. <i class="fa-solid fa-comments"></i> <b>Dialogue Polish</b> - Subtext, voices<br>
-                    5. <i class="fa-solid fa-pen-fancy"></i> <b>Prose Craft</b> - Rhythm, cut filler<br>
-                    6. <i class="fa-solid fa-gauge-high"></i> <b>Pacing Fix</b> - Scene tempo<br>
-                    7. <i class="fa-solid fa-triangle-exclamation"></i> <b>Pitfall Checker</b> - Anti-patterns<br>
-                    8. <i class="fa-solid fa-flag-checkered"></i> <b>Chapter Ending</b> - Strong hooks<br>
-                    9. <i class="fa-solid fa-wand-magic-sparkles"></i> <b>Humanizer</b> - Final polish
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Main button - Apply selected pack<br>
+                    <i class="fa-solid fa-caret-down"></i> Dropdown - Choose pack or Run All<br>
+                    <i class="fa-solid fa-forward"></i> <b>Run All</b> - Apply all 4 packs in order (click toast to cancel)<br><br>
+                    <b>Improvement Packs (4 API calls instead of 9):</b><br>
+                    1. <i class="fa-solid fa-diagram-project"></i> <b>Story & Logic</b> - Plot coherence + NPC perception<br>
+                    2. <i class="fa-solid fa-pen-fancy"></i> <b>Prose & Style</b> - Show/tell + dialogue + prose + pacing<br>
+                    3. <i class="fa-solid fa-flag-checkered"></i> <b>Polish & Endings</b> - Pitfalls + chapter endings<br>
+                    4. <i class="fa-solid fa-wand-magic-sparkles"></i> <b>Humanize</b> - Final natural dialogue pass
                 </small>
             </div>
         </div>

@@ -21,17 +21,17 @@ let runAllInProgress = false;
 let runAllCancelled = false;
 
 // ============================================================================
-// IMPROVEMENT TYPES AND PROMPTS
+// IMPROVEMENT PACKS - Combined prompts for efficiency
 // ============================================================================
 
-const IMPROVEMENT_TYPES = {
-    plotCoherence: {
-        name: 'Plot Coherence',
+const IMPROVEMENT_PACKS = {
+    storyLogic: {
+        name: 'Story & Logic',
         icon: 'fa-diagram-project',
-        description: 'Fix logical inconsistencies and cause-effect issues',
-        prompt: `Review and rewrite this message to improve plot coherence and logical consistency.
+        description: 'Fix plot coherence and stop telepathic NPCs',
+        prompt: `Rewrite this message applying the following improvements:
 
-GOALS:
+=== PLOT COHERENCE ===
 - Ensure cause-and-effect is logical
 - Character actions must stem from established motivations
 - No sudden personality shifts without cause
@@ -39,25 +39,10 @@ GOALS:
 - Consequences should follow naturally from previous events
 - What characters want must cost them something to pursue
 
-CONTEXT:
-{{context}}
+=== NPC PERCEPTION FIX ===
+CRITICAL: Characters are often written as "telepathic" - suspecting secrets, hidden identities, or special origins without realistic justification. This breaks immersion.
 
-ORIGINAL MESSAGE TO REWRITE:
-{{message}}
-
-Provide ONLY the rewritten message with improved plot coherence, no explanations.`
-    },
-
-    npcPerception: {
-        name: 'NPC Perception Fix',
-        icon: 'fa-brain',
-        description: 'Stop NPCs from being telepathic or overly suspicious',
-        prompt: `Rewrite this message to fix unrealistic NPC perception and knowledge.
-
-CRITICAL PROBLEM TO FIX:
-Characters are being "telepathic" - they suspect secrets, hidden identities, or special origins without realistic justification. This breaks immersion.
-
-GOALS:
+Fix this by:
 - NPCs must NOT intuit the protagonist's secrets, hidden powers, or special nature
 - Unusual behavior should be explained with MUNDANE reasons:
   * "He's a prodigy" not "He must have lived before"
@@ -67,13 +52,7 @@ GOALS:
 - NPCs operate on LOCAL, SETTING-SPECIFIC common knowledge only
 - No character should be inexplicably suspicious or perceptive
 - Trust must be earned through actions, but distrust needs CONCRETE reasons
-- If a character uses unusual abilities, NPCs categorize it using THEIR world's understanding (superstition, science, religion - whatever fits their background)
-
-BAD: "There's something different about you... like you've seen things no child should know."
-GOOD: "You're sharp for your age. Your parents must have taught you well."
-
-BAD: "I sense you're hiding your true nature."
-GOOD: "You're quiet. Thoughtful. Reminds me of my nephew - always reading."
+- If a character uses unusual abilities, NPCs categorize it using THEIR world's understanding
 
 CONTEXT:
 {{context}}
@@ -81,74 +60,38 @@ CONTEXT:
 ORIGINAL MESSAGE TO REWRITE:
 {{message}}
 
-Provide ONLY the rewritten message with realistic NPC perception, no explanations.`
+Apply ALL the above rules and provide ONLY the rewritten message, no explanations.`
     },
 
-    showDontTell: {
-        name: 'Show Don\'t Tell',
-        icon: 'fa-eye',
-        description: 'Convert telling statements to sensory showing',
-        prompt: `Rewrite this message applying "Show Don't Tell" principles.
+    proseStyle: {
+        name: 'Prose & Style',
+        icon: 'fa-pen-fancy',
+        description: 'Transform prose with showing, dialogue, rhythm, and pacing',
+        prompt: `Rewrite this message applying the following improvements:
 
-GOALS:
+=== SHOW DON'T TELL ===
 - Replace weak state-of-being verbs (is, was, felt) with action verbs
-- Convert emotional labels into physical actions (not "he was scared" but "his hands trembled")
+- Convert emotional labels into physical actions:
+  * "He was scared" → "His hands trembled"
+  * "She was angry" → "Her jaw clenched"
+  * "The room was tense" → "No one moved. Someone's chair creaked."
 - Weave setting details into action, not static description blocks
 - Appeal to senses naturally: sight, sound, smell, taste, touch
 - Trust the reader - don't over-explain what actions already imply
 - Use active voice instead of passive
 
-BAD: "He was scared." GOOD: "His hands trembled."
-BAD: "She was angry." GOOD: "Her jaw clenched."
-BAD: "The room was tense." GOOD: "No one moved. Someone's chair creaked."
-
-CONTEXT:
-{{context}}
-
-ORIGINAL MESSAGE TO REWRITE:
-{{message}}
-
-Provide ONLY the rewritten message with showing instead of telling, no explanations.`
-    },
-
-    dialoguePolish: {
-        name: 'Dialogue Polish',
-        icon: 'fa-comments',
-        description: 'Fix exposition dumps, add subtext, vary responses',
-        prompt: `Rewrite this message to improve dialogue quality.
-
-GOALS:
+=== DIALOGUE POLISH ===
 - NO EXPOSITION DUMPS: Characters must not lecture or explain backstory directly
+  * BAD: "I chose her because she is brave and pragmatic."
+  * GOOD: "She stood up to her family. That took guts. I need that."
 - Add SUBTEXT: People rarely say what they mean - they deflect, use sarcasm, talk around issues
 - DISTINCT VOICES: Each character should sound different (vocabulary, sentence length, speech patterns)
 - Use contractions and fragments - real speech is messy
-- VARY RESPONSES: Not every line needs a direct answer. Characters can:
-  * Ignore questions
-  * Answer with actions instead of words
-  * Deflect or change topic
-  * Counter-question
+- VARY RESPONSES: Not every line needs a direct answer. Characters can ignore questions, answer with actions, deflect, or counter-question
 - Remove filler responses: "I see", "Indeed", "Very well", "Understood"
 - Use simple "said" for attribution, not "exclaimed/retorted/queried"
 
-BAD: "I chose her because she is brave and pragmatic."
-GOOD: "She stood up to her family. That took guts. I need that."
-
-CONTEXT:
-{{context}}
-
-ORIGINAL MESSAGE TO REWRITE:
-{{message}}
-
-Provide ONLY the rewritten message with polished dialogue, no explanations.`
-    },
-
-    proseCraft: {
-        name: 'Prose Craft',
-        icon: 'fa-pen-fancy',
-        description: 'Improve sentence rhythm, cut filler, strengthen verbs',
-        prompt: `Rewrite this message to improve prose quality.
-
-GOALS:
+=== PROSE CRAFT ===
 - SENTENCE RHYTHM: Vary sentence length deliberately. Short sentences punch. Longer ones flow.
 - ECONOMY: Every sentence earns its place. Cut filler. Prefer strong verbs over adverbs.
 - SKIP OBVIOUS: Don't describe routine actions (opening doors, pressing buttons). Jump to impact.
@@ -160,25 +103,7 @@ GOALS:
   * BAD: "Silence stretched between them"
   * GOOD: Show discomfort through action
 
-BAD: "He walked slowly and quietly across the room."
-GOOD: "He crept across the room."
-
-CONTEXT:
-{{context}}
-
-ORIGINAL MESSAGE TO REWRITE:
-{{message}}
-
-Provide ONLY the rewritten message with improved prose, no explanations.`
-    },
-
-    pacingFix: {
-        name: 'Pacing Fix',
-        icon: 'fa-gauge-high',
-        description: 'Adjust scene pacing, cut boring parts',
-        prompt: `Rewrite this message to improve pacing.
-
-GOALS:
+=== PACING FIX ===
 - SKIP THE BORING: Jump over travel, routine meals, uneventful moments. Start scenes late.
 - ACTION SEQUENCES: Short sentences, rapid exchanges, minimal description
 - EMOTIONAL SCENES: Slower, more sensory detail, longer beats
@@ -186,28 +111,23 @@ GOALS:
 - Every scene should raise a question the reader wants answered
 - Don't pad length - end at compelling moments
 
-BAD: "They walked for three hours before reaching the castle."
-GOOD: "The castle gates loomed ahead. Her feet ached."
-
-SPEED UP: Short sentences. Fragments. Action verbs. Cut adjectives.
-SLOW DOWN: Longer sentences with sensory detail, internal reflection.
-
 CONTEXT:
 {{context}}
 
 ORIGINAL MESSAGE TO REWRITE:
 {{message}}
 
-Provide ONLY the rewritten message with improved pacing, no explanations.`
+Apply ALL the above rules and provide ONLY the rewritten message, no explanations.`
     },
 
-    pitfallChecker: {
-        name: 'Pitfall Checker',
-        icon: 'fa-triangle-exclamation',
-        description: 'Identify and fix common writing anti-patterns',
-        prompt: `Rewrite this message to fix common writing pitfalls.
+    polishEndings: {
+        name: 'Polish & Endings',
+        icon: 'fa-flag-checkered',
+        description: 'Fix common pitfalls and strengthen scene endings',
+        prompt: `Rewrite this message applying the following improvements:
 
-PITFALLS TO FIX:
+=== PITFALL CHECKER ===
+Fix these common writing problems:
 
 1. NO TELEPATHIC SHORTCUTS - Don't use psychic bonds to tell what others feel. Show through behavior.
 
@@ -238,20 +158,8 @@ PITFALLS TO FIX:
    BANNED: "Silence fell", "The room went quiet"
    Show characters noticing it through action.
 
-CONTEXT:
-{{context}}
-
-ORIGINAL MESSAGE TO REWRITE:
-{{message}}
-
-Provide ONLY the rewritten message with pitfalls fixed, no explanations.`
-    },
-
-    chapterEnding: {
-        name: 'Chapter Ending',
-        icon: 'fa-flag-checkered',
-        description: 'Strengthen weak chapter/scene endings',
-        prompt: `Rewrite the ending of this message to create a stronger hook.
+=== CHAPTER/SCENE ENDING ===
+Strengthen the ending of this message:
 
 BANNED ENDING PATTERNS (remove these):
 - Reflective summaries: "And that was enough." / "For now, that would have to do."
@@ -260,7 +168,7 @@ BANNED ENDING PATTERNS (remove these):
 - Falling asleep: "And with that thought, sleep claimed me."
 - Content smiling/nodding: "I smiled to myself."
 
-STRONG ENDINGS (use one of these):
+USE STRONG ENDINGS:
 - MID-ACTION: Cut during a fight, chase, or confrontation
 - REVELATION: A secret exposed, new information that reframes everything
 - DECISION POINT: Character commits to an irreversible choice
@@ -268,28 +176,28 @@ STRONG ENDINGS (use one of these):
 - DIALOGUE HOOK: A line that raises questions: "There's something you need to know."
 - THREAT: Danger announced or glimpsed
 
-TEST: Does the reader urgently need to know what happens next? If not, cut earlier or add a complication.
-
 CONTEXT:
 {{context}}
 
 ORIGINAL MESSAGE TO REWRITE:
 {{message}}
 
-Provide ONLY the rewritten message with a stronger ending, no explanations.`
+Apply ALL the above rules and provide ONLY the rewritten message, no explanations.`
     },
 
-    humanizer: {
-        name: 'Humanizer',
+    humanize: {
+        name: 'Humanize',
         icon: 'fa-wand-magic-sparkles',
-        description: 'Make dialogue flow naturally and sound less robotic (Final Polish)',
-        prompt: `Rewrite the following message to make it sound more natural and human-like.
+        description: 'Final pass - make dialogue natural and human-like',
+        prompt: `This is the FINAL polishing step. Rewrite the message to make it sound natural and human-like.
 
 GOALS:
 - Dialogue should flow naturally with contractions, fragments, and realistic speech patterns
 - Characters should not speak in perfect paragraphs
-- Remove robotic or overly logical responses
+- Remove any remaining robotic or overly logical responses
 - Keep the same content and meaning, just make it sound like real people talking
+- Smooth out any awkward phrasing from previous edits
+- Ensure the overall flow reads naturally
 
 CONTEXT:
 {{context}}
@@ -301,11 +209,14 @@ Provide ONLY the rewritten message, no explanations.`
     }
 };
 
+// Pack execution order
+const PACK_ORDER = ['storyLogic', 'proseStyle', 'polishEndings', 'humanize'];
+
 const defaultSettings = {
     enabled: true,
-    selectedType: 'plotCoherence',
+    selectedPack: 'storyLogic',
     contextDepth: 3,
-    prompts: {} // Will store custom prompts per type
+    prompts: {} // Will store custom prompts per pack
 };
 
 // ============================================================================
@@ -323,8 +234,8 @@ function loadSettings() {
     if (extension_settings[settingsKey].contextDepth === undefined) {
         extension_settings[settingsKey].contextDepth = defaultSettings.contextDepth;
     }
-    if (!extension_settings[settingsKey].selectedType) {
-        extension_settings[settingsKey].selectedType = defaultSettings.selectedType;
+    if (!extension_settings[settingsKey].selectedPack) {
+        extension_settings[settingsKey].selectedPack = defaultSettings.selectedPack;
     }
     if (!extension_settings[settingsKey].prompts) {
         extension_settings[settingsKey].prompts = {};
@@ -333,24 +244,19 @@ function loadSettings() {
     // Update UI
     $('#humanize_enabled').prop('checked', extension_settings[settingsKey].enabled);
     $('#humanize_context_depth').val(extension_settings[settingsKey].contextDepth);
-    $('#humanize_type_select').val(extension_settings[settingsKey].selectedType);
+    $('#humanize_pack_select').val(extension_settings[settingsKey].selectedPack);
 
-    // Load the prompt for selected type
+    // Load the prompt for selected pack
     updatePromptDisplay();
 }
 
 function updatePromptDisplay() {
-    const selectedType = extension_settings[settingsKey].selectedType;
-    const customPrompt = extension_settings[settingsKey].prompts[selectedType];
-    const defaultPrompt = IMPROVEMENT_TYPES[selectedType]?.prompt || '';
+    const selectedPack = extension_settings[settingsKey].selectedPack;
+    const customPrompt = extension_settings[settingsKey].prompts[selectedPack];
+    const defaultPrompt = IMPROVEMENT_PACKS[selectedPack]?.prompt || '';
 
     $('#humanize_prompt').val(customPrompt || defaultPrompt);
-    $('#humanize_type_description').text(IMPROVEMENT_TYPES[selectedType]?.description || '');
-}
-
-// Get ordered array of improvement type keys
-function getImprovementOrder() {
-    return Object.keys(IMPROVEMENT_TYPES);
+    $('#humanize_pack_description').text(IMPROVEMENT_PACKS[selectedPack]?.description || '');
 }
 
 // ============================================================================
@@ -358,14 +264,14 @@ function getImprovementOrder() {
 // ============================================================================
 
 /**
- * Improve a message with a specific improvement type
+ * Apply an improvement pack to a message
  * @param {number} messageId - The message index to improve
- * @param {string|null} improvementType - The improvement type key, or null to use selected type
+ * @param {string|null} packKey - The pack key, or null to use selected pack
  * @param {object} options - Options for the improvement
  * @param {boolean} options.silent - If true, don't show individual toasts (for Run All mode)
  * @returns {Promise<{success: boolean, error?: string}>} Result of the improvement
  */
-async function improveMessage(messageId, improvementType = null, options = {}) {
+async function applyPack(messageId, packKey = null, options = {}) {
     const { silent = false } = options;
     const context = getContext();
     const chat = context.chat;
@@ -389,13 +295,13 @@ async function improveMessage(messageId, improvementType = null, options = {}) {
         return { success: false, error: 'Message is empty' };
     }
 
-    // Use provided type or fall back to selected type
-    const typeKey = improvementType || extension_settings[settingsKey].selectedType;
-    const typeInfo = IMPROVEMENT_TYPES[typeKey];
+    // Use provided pack or fall back to selected pack
+    const activePackKey = packKey || extension_settings[settingsKey].selectedPack;
+    const packInfo = IMPROVEMENT_PACKS[activePackKey];
 
-    if (!typeInfo) {
-        if (!silent) toastr.error('Unknown improvement type', 'Humanize');
-        return { success: false, error: 'Unknown improvement type' };
+    if (!packInfo) {
+        if (!silent) toastr.error('Unknown improvement pack', 'Humanize');
+        return { success: false, error: 'Unknown improvement pack' };
     }
 
     // Build chat context
@@ -416,15 +322,15 @@ async function improveMessage(messageId, improvementType = null, options = {}) {
         : '(No previous context)';
 
     // Get the prompt (custom or default)
-    const customPrompt = extension_settings[settingsKey].prompts[typeKey];
-    const promptTemplate = customPrompt || typeInfo.prompt;
+    const customPrompt = extension_settings[settingsKey].prompts[activePackKey];
+    const promptTemplate = customPrompt || packInfo.prompt;
     const fullPrompt = promptTemplate
         .replace('{{context}}', contextString)
         .replace('{{message}}', originalContent);
 
     // Show processing toast (unless silent)
     if (!silent) {
-        toastr.info(`Applying ${typeInfo.name}...`, 'Humanize', { timeOut: 0, extendedTimeOut: 0 });
+        toastr.info(`Applying ${packInfo.name}...`, 'Humanize', { timeOut: 0, extendedTimeOut: 0 });
     }
 
     // Disable buttons during processing
@@ -433,7 +339,7 @@ async function improveMessage(messageId, improvementType = null, options = {}) {
     button.addClass('disabled');
     dropdownBtn.addClass('disabled');
 
-    console.log(`[Humanize] Starting ${typeInfo.name}...`);
+    console.log(`[Humanize] Starting ${packInfo.name}...`);
     console.log('[Humanize] Prompt length:', fullPrompt.length);
 
     try {
@@ -469,7 +375,7 @@ async function improveMessage(messageId, improvementType = null, options = {}) {
 
         saveChatDebounced();
 
-        if (!silent) toastr.success(`${typeInfo.name} applied!`, 'Humanize');
+        if (!silent) toastr.success(`${packInfo.name} applied!`, 'Humanize');
         button.removeClass('disabled');
         dropdownBtn.removeClass('disabled');
 
@@ -488,17 +394,16 @@ async function improveMessage(messageId, improvementType = null, options = {}) {
 }
 
 /**
- * Run all improvements on a message in sequence
+ * Run all packs on a message in sequence
  * @param {number} messageId - The message index to improve
  */
-async function runAllImprovements(messageId) {
+async function runAllPacks(messageId) {
     if (runAllInProgress) {
         toastr.warning('Run All already in progress', 'Humanize');
         return;
     }
 
-    const improvementOrder = getImprovementOrder();
-    const totalSteps = improvementOrder.length;
+    const totalSteps = PACK_ORDER.length;
 
     runAllInProgress = true;
     runAllCancelled = false;
@@ -509,7 +414,7 @@ async function runAllImprovements(messageId) {
     button.addClass('disabled');
     dropdownBtn.addClass('disabled');
 
-    console.log(`[Humanize] Starting Run All with ${totalSteps} improvements...`);
+    console.log(`[Humanize] Starting Run All Packs (${totalSteps} packs)...`);
 
     // Show initial progress toast
     toastr.info(`Run All: Starting (0/${totalSteps})...`, 'Humanize', {
@@ -526,20 +431,20 @@ async function runAllImprovements(messageId) {
     let completedSteps = 0;
     let errors = [];
 
-    for (let i = 0; i < improvementOrder.length; i++) {
+    for (let i = 0; i < PACK_ORDER.length; i++) {
         // Check for cancellation
         if (runAllCancelled) {
             toastr.clear();
-            toastr.warning(`Run All cancelled after ${completedSteps}/${totalSteps} steps`, 'Humanize');
+            toastr.warning(`Run All cancelled after ${completedSteps}/${totalSteps} packs`, 'Humanize');
             break;
         }
 
-        const typeKey = improvementOrder[i];
-        const typeInfo = IMPROVEMENT_TYPES[typeKey];
+        const packKey = PACK_ORDER[i];
+        const packInfo = IMPROVEMENT_PACKS[packKey];
 
         // Update progress toast
         toastr.clear();
-        toastr.info(`Run All: ${typeInfo.name} (${i + 1}/${totalSteps})...\n<small>Click to cancel</small>`, 'Humanize', {
+        toastr.info(`Run All: ${packInfo.name} (${i + 1}/${totalSteps})...\n<small>Click to cancel</small>`, 'Humanize', {
             timeOut: 0,
             extendedTimeOut: 0,
             tapToDismiss: false,
@@ -550,20 +455,20 @@ async function runAllImprovements(messageId) {
             }
         });
 
-        console.log(`[Humanize] Run All: Step ${i + 1}/${totalSteps} - ${typeInfo.name}`);
+        console.log(`[Humanize] Run All: Pack ${i + 1}/${totalSteps} - ${packInfo.name}`);
 
-        const result = await improveMessage(messageId, typeKey, { silent: true });
+        const result = await applyPack(messageId, packKey, { silent: true });
 
         if (result.success) {
             completedSteps++;
         } else {
-            errors.push(`${typeInfo.name}: ${result.error}`);
-            console.warn(`[Humanize] Run All: ${typeInfo.name} failed - ${result.error}`);
-            // Continue with next improvement despite error
+            errors.push(`${packInfo.name}: ${result.error}`);
+            console.warn(`[Humanize] Run All: ${packInfo.name} failed - ${result.error}`);
+            // Continue with next pack despite error
         }
 
-        // Small delay between steps to avoid overwhelming the API
-        if (i < improvementOrder.length - 1 && !runAllCancelled) {
+        // Small delay between packs to avoid overwhelming the API
+        if (i < PACK_ORDER.length - 1 && !runAllCancelled) {
             await new Promise(resolve => setTimeout(resolve, 500));
         }
     }
@@ -577,12 +482,12 @@ async function runAllImprovements(messageId) {
     if (runAllCancelled) {
         // Already showed cancellation message
     } else if (errors.length === 0) {
-        toastr.success(`Run All complete! All ${totalSteps} improvements applied.`, 'Humanize');
+        toastr.success(`Run All complete! All ${totalSteps} packs applied.`, 'Humanize');
     } else if (completedSteps > 0) {
-        toastr.warning(`Run All: ${completedSteps}/${totalSteps} improvements applied.\n${errors.length} errors occurred.`, 'Humanize');
+        toastr.warning(`Run All: ${completedSteps}/${totalSteps} packs applied.\n${errors.length} errors occurred.`, 'Humanize');
         console.warn('[Humanize] Run All errors:', errors);
     } else {
-        toastr.error('Run All failed - no improvements could be applied', 'Humanize');
+        toastr.error('Run All failed - no packs could be applied', 'Humanize');
     }
 
     // Re-enable buttons
@@ -611,47 +516,48 @@ function addImproveButton(messageId) {
     // Create container for button + dropdown
     const buttonContainer = $(`<div class="improve-btn-container" style="position: relative; display: inline-flex;"></div>`);
 
-    // Main button (uses selected type)
-    const selectedType = extension_settings[settingsKey].selectedType;
-    const typeInfo = IMPROVEMENT_TYPES[selectedType];
-    const mainButton = $(`<div class="improve-msg-btn mes_button fa-solid ${typeInfo?.icon || 'fa-wand-magic-sparkles'} interactable" title="${typeInfo?.name || 'Improve'}: ${typeInfo?.description || ''}" data-message-id="${messageId}"></div>`);
+    // Main button (uses selected pack)
+    const selectedPack = extension_settings[settingsKey].selectedPack;
+    const packInfo = IMPROVEMENT_PACKS[selectedPack];
+    const mainButton = $(`<div class="improve-msg-btn mes_button fa-solid ${packInfo?.icon || 'fa-wand-magic-sparkles'} interactable" title="${packInfo?.name || 'Improve'}: ${packInfo?.description || ''}" data-message-id="${messageId}"></div>`);
 
     // Dropdown toggle button
-    const dropdownBtn = $(`<div class="improve-dropdown-btn mes_button fa-solid fa-caret-down interactable" title="Select improvement type" data-message-id="${messageId}" style="font-size: 0.7em; margin-left: -2px;"></div>`);
+    const dropdownBtn = $(`<div class="improve-dropdown-btn mes_button fa-solid fa-caret-down interactable" title="Select improvement pack" data-message-id="${messageId}" style="font-size: 0.7em; margin-left: -2px;"></div>`);
 
     // Dropdown menu
     const dropdownMenu = $(`<div class="improve-dropdown-menu" style="display: none;"></div>`);
 
-    // Add "Run All" option at the top
+    // Add "Run All Packs" option at the top
     const runAllItem = $(`<div class="improve-dropdown-item improve-run-all" data-message-id="${messageId}">
-        <i class="fa-solid fa-forward"></i> <b>Run All (1-9)</b>
+        <i class="fa-solid fa-forward"></i> <b>Run All Packs (1→4)</b>
     </div>`);
     runAllItem.on('click', function(e) {
         e.stopPropagation();
         const msgId = $(this).data('message-id');
         dropdownMenu.hide();
-        runAllImprovements(msgId);
+        runAllPacks(msgId);
     });
     dropdownMenu.append(runAllItem);
 
     // Add separator
     dropdownMenu.append($('<div class="improve-dropdown-separator"></div>'));
 
-    // Add all improvement types to dropdown
-    let stepNum = 1;
-    for (const [key, info] of Object.entries(IMPROVEMENT_TYPES)) {
-        const item = $(`<div class="improve-dropdown-item" data-type="${key}" data-message-id="${messageId}">
-            <i class="fa-solid ${info.icon}"></i> ${stepNum}. ${info.name}
+    // Add all packs to dropdown
+    let packNum = 1;
+    for (const packKey of PACK_ORDER) {
+        const info = IMPROVEMENT_PACKS[packKey];
+        const item = $(`<div class="improve-dropdown-item" data-pack="${packKey}" data-message-id="${messageId}">
+            <i class="fa-solid ${info.icon}"></i> ${packNum}. ${info.name}
         </div>`);
         item.on('click', function(e) {
             e.stopPropagation();
-            const type = $(this).data('type');
+            const pack = $(this).data('pack');
             const msgId = $(this).data('message-id');
             dropdownMenu.hide();
-            improveMessage(msgId, type);
+            applyPack(msgId, pack);
         });
         dropdownMenu.append(item);
-        stepNum++;
+        packNum++;
     }
 
     // Main button click
@@ -659,7 +565,7 @@ function addImproveButton(messageId) {
         e.stopPropagation();
         if ($(this).hasClass('disabled')) return;
         const msgId = parseInt($(this).data('message-id'));
-        improveMessage(msgId);
+        applyPack(msgId);
     });
 
     // Dropdown toggle click
@@ -696,16 +602,16 @@ function removeAllButtons() {
 }
 
 function updateAllButtonIcons() {
-    const selectedType = extension_settings[settingsKey].selectedType;
-    const typeInfo = IMPROVEMENT_TYPES[selectedType];
+    const selectedPack = extension_settings[settingsKey].selectedPack;
+    const packInfo = IMPROVEMENT_PACKS[selectedPack];
 
     $('.improve-msg-btn').each(function() {
         // Remove all fa- classes except fa-solid
         $(this).removeClass(function(index, className) {
             return (className.match(/(^|\s)fa-(?!solid)\S+/g) || []).join(' ');
         });
-        $(this).addClass(typeInfo?.icon || 'fa-wand-magic-sparkles');
-        $(this).attr('title', `${typeInfo?.name || 'Improve'}: ${typeInfo?.description || ''}`);
+        $(this).addClass(packInfo?.icon || 'fa-wand-magic-sparkles');
+        $(this).attr('title', `${packInfo?.name || 'Improve'}: ${packInfo?.description || ''}`);
     });
 }
 
@@ -725,42 +631,42 @@ function onEnabledChange() {
     }
 }
 
-function onTypeChange() {
-    const selectedType = $('#humanize_type_select').val();
-    extension_settings[settingsKey].selectedType = selectedType;
+function onPackChange() {
+    const selectedPack = $('#humanize_pack_select').val();
+    extension_settings[settingsKey].selectedPack = selectedPack;
     saveSettingsDebounced();
     updatePromptDisplay();
     updateAllButtonIcons();
 }
 
 function onPromptChange() {
-    const selectedType = extension_settings[settingsKey].selectedType;
+    const selectedPack = extension_settings[settingsKey].selectedPack;
     const newPrompt = $('#humanize_prompt').val();
 
     // Only save if different from default
-    if (newPrompt !== IMPROVEMENT_TYPES[selectedType]?.prompt) {
-        extension_settings[settingsKey].prompts[selectedType] = newPrompt;
+    if (newPrompt !== IMPROVEMENT_PACKS[selectedPack]?.prompt) {
+        extension_settings[settingsKey].prompts[selectedPack] = newPrompt;
     } else {
-        delete extension_settings[settingsKey].prompts[selectedType];
+        delete extension_settings[settingsKey].prompts[selectedPack];
     }
     saveSettingsDebounced();
 }
 
 function restoreDefaultPrompt() {
-    const selectedType = extension_settings[settingsKey].selectedType;
-    delete extension_settings[settingsKey].prompts[selectedType];
-    $('#humanize_prompt').val(IMPROVEMENT_TYPES[selectedType]?.prompt || '');
+    const selectedPack = extension_settings[settingsKey].selectedPack;
+    delete extension_settings[settingsKey].prompts[selectedPack];
+    $('#humanize_prompt').val(IMPROVEMENT_PACKS[selectedPack]?.prompt || '');
     saveSettingsDebounced();
-    toastr.success(`Default prompt restored for ${IMPROVEMENT_TYPES[selectedType]?.name}`, 'Humanize');
+    toastr.success(`Default prompt restored for ${IMPROVEMENT_PACKS[selectedPack]?.name}`, 'Humanize');
 }
 
 function restoreAllDefaults() {
     extension_settings[settingsKey].prompts = {};
     extension_settings[settingsKey].contextDepth = defaultSettings.contextDepth;
-    extension_settings[settingsKey].selectedType = defaultSettings.selectedType;
+    extension_settings[settingsKey].selectedPack = defaultSettings.selectedPack;
 
     $('#humanize_context_depth').val(defaultSettings.contextDepth);
-    $('#humanize_type_select').val(defaultSettings.selectedType);
+    $('#humanize_pack_select').val(defaultSettings.selectedPack);
     updatePromptDisplay();
     updateAllButtonIcons();
     saveSettingsDebounced();
@@ -780,7 +686,7 @@ jQuery(async () => {
 
         // Event handlers
         $('#humanize_enabled').on('change', onEnabledChange);
-        $('#humanize_type_select').on('change', onTypeChange);
+        $('#humanize_pack_select').on('change', onPackChange);
         $('#humanize_prompt').on('input', onPromptChange);
         $('#humanize_context_depth').on('input', function() {
             extension_settings[settingsKey].contextDepth = parseInt($(this).val()) || 0;
