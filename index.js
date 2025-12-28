@@ -20,93 +20,34 @@ const settingsKey = 'humanize';
 // COMBINED IMPROVEMENT PROMPT - All rules in one API call
 // ============================================================================
 
-const DEFAULT_PROMPT = `You are a writing improvement assistant. Rewrite the following message applying ALL these improvements:
+const DEFAULT_PROMPT = `Rewrite this message with these fixes:
 
-=== 1. STORY & LOGIC ===
-- Ensure cause-and-effect is logical
-- Character actions must stem from established motivations
-- No sudden personality shifts without cause
-- No deus ex machina or convenient coincidences
-
-=== 2. NPC PERCEPTION FIX ===
-CRITICAL: Fix "telepathic" characters who unrealistically suspect secrets or hidden identities.
-- NPCs must NOT intuit the protagonist's secrets, hidden powers, or special nature
-- Unusual behavior should be explained with MUNDANE reasons:
-  * "He's a prodigy" NOT "He must have lived before"
-  * "She's eccentric" NOT "She's hiding something"
-  * "Natural talent" NOT "There's something different about them"
-- NPCs use their world's understanding, not meta-knowledge
-
-=== 3. SHOW DON'T TELL ===
-- Replace "was/felt" with action verbs
-- Convert emotional labels to physical actions:
-  * "He was scared" → "His hands trembled"
-  * "She was angry" → "Her jaw clenched"
-- Weave setting into action, not static description
-- Use active voice
-
-=== 4. DIALOGUE POLISH ===
-- NO EXPOSITION DUMPS - characters don't lecture
-- Add SUBTEXT - people deflect, use sarcasm, talk around issues
-- DISTINCT VOICES - vary vocabulary and patterns per character
-- Use contractions and fragments
-- Remove filler: "I see", "Indeed", "Very well"
-- Use "said" not "exclaimed/retorted/queried"
-
-=== 5. PROSE CRAFT ===
-- Vary sentence length (short punches, long flows)
-- Cut filler, prefer strong verbs over adverbs
-- Skip routine actions (opening doors, etc.)
-- No cliché similes
-- Remove vague "something" constructions
-- Remove silence labels ("Silence fell")
-
-=== 6. PACING ===
-- Skip boring parts (travel, routine meals)
-- Action scenes: short sentences, rapid exchanges
-- Emotional scenes: slower, more sensory detail
-
-=== 7. PITFALL FIXES ===
-- No telepathic shortcuts
-- No explaining the theme through dialogue
-- No "complicated" or "unreadable" expressions
-- No backstory dumps mid-emotion
-- Ground emotion in physical action
-- No on-the-nose dialogue ("You're afraid, aren't you?")
-
-=== 8. STRONG ENDINGS ===
-Remove weak endings like:
-- "And that was enough"
-- "Perhaps that was what it meant to..."
-- "Things were about to change"
-- Falling asleep endings
-- Content smiling/nodding
-
-Use strong endings:
-- Mid-action cuts
-- Revelations
-- Decision points
-- Dialogue hooks
-
-=== 9. HUMANIZE (FINAL POLISH) ===
-- Dialogue flows naturally with contractions and fragments
-- Characters don't speak in perfect paragraphs
-- Remove robotic responses
-- Smooth out awkward phrasing
+1. LOGIC: Ensure cause-effect, no sudden personality shifts, no deus ex machina
+2. NPC PERCEPTION: NPCs must NOT sense secrets/hidden powers. Use mundane explanations ("prodigy" not "lived before", "eccentric" not "hiding something")
+3. SHOW DON'T TELL: Replace "was scared/angry" with actions ("hands trembled", "jaw clenched"). Use active voice.
+4. DIALOGUE: No exposition dumps. Add subtext. Distinct voices. Use contractions. Remove "I see/Indeed/Very well". Use "said".
+5. PROSE: Vary sentence length. Cut filler. Strong verbs. No clichés. No vague "something". No "silence fell".
+6. PACING: Skip boring parts. Action=short sentences. Emotion=sensory detail.
+7. PITFALLS: No telepathic shortcuts. No theme explanations. No "complicated expression". Ground emotion in action.
+8. ENDINGS: Remove "And that was enough"/"Things were about to change"/falling asleep. Use hooks/revelations/mid-action cuts.
+9. HUMANIZE: Natural dialogue with contractions/fragments. No robotic speech.
 
 CONTEXT:
 {{context}}
 
-ORIGINAL MESSAGE TO REWRITE:
+MESSAGE:
 {{message}}
 
-Apply ALL improvements and provide ONLY the rewritten message. No explanations.`;
+Rewrite applying ALL fixes. Output ONLY the improved message.`;
 
 const defaultSettings = {
     enabled: true,
     contextDepth: 3,
     prompt: ''
 };
+
+// Max characters for the entire prompt (roughly 8k tokens)
+const MAX_PROMPT_CHARS = 32000;
 
 // ============================================================================
 // SETTINGS MANAGEMENT
@@ -156,16 +97,34 @@ async function improveMessage(messageId) {
         return;
     }
 
-    // Build chat context
+    // Get the prompt template
+    const promptTemplate = extension_settings[settingsKey].prompt || DEFAULT_PROMPT;
+
+    // Calculate available space for context (total - template - message - buffer)
+    const templateSize = promptTemplate.replace('{{context}}', '').replace('{{message}}', '').length;
+    const messageSize = originalContent.length;
+    const availableForContext = MAX_PROMPT_CHARS - templateSize - messageSize - 500; // 500 char buffer
+
+    // Build chat context with size limit
     const contextDepth = extension_settings[settingsKey].contextDepth || 3;
     const startIndex = Math.max(0, messageId - contextDepth);
     let contextMessages = [];
+    let contextSize = 0;
 
     for (let i = startIndex; i < messageId; i++) {
         const msg = chat[i];
         if (msg && msg.mes) {
             const name = msg.is_user ? 'User' : (msg.name || 'Character');
-            contextMessages.push(`${name}: ${msg.mes}`);
+            const entry = `${name}: ${msg.mes}`;
+
+            // Check if adding this would exceed limit
+            if (contextSize + entry.length > availableForContext && availableForContext > 0) {
+                console.log('[Humanize] Context truncated to fit token limit');
+                break;
+            }
+
+            contextMessages.push(entry);
+            contextSize += entry.length + 2; // +2 for \n\n
         }
     }
 
@@ -173,8 +132,7 @@ async function improveMessage(messageId) {
         ? contextMessages.join('\n\n')
         : '(No previous context)';
 
-    // Get the prompt
-    const promptTemplate = extension_settings[settingsKey].prompt || DEFAULT_PROMPT;
+    // Build full prompt
     const fullPrompt = promptTemplate
         .replace('{{context}}', contextString)
         .replace('{{message}}', originalContent);
@@ -186,14 +144,16 @@ async function improveMessage(messageId) {
     const button = $(`.humanize-btn[data-message-id="${messageId}"]`);
     button.addClass('disabled');
 
+    const estimatedTokens = Math.ceil(fullPrompt.length / 4);
     console.log('[Humanize] Starting improvement...');
-    console.log('[Humanize] Prompt length:', fullPrompt.length);
-    console.log('[Humanize] Message length:', originalContent.length);
-    console.log('[Humanize] Context length:', contextString.length);
+    console.log('[Humanize] Prompt:', fullPrompt.length, 'chars (~' + estimatedTokens + ' tokens)');
+    console.log('[Humanize] Message:', originalContent.length, 'chars');
+    console.log('[Humanize] Context:', contextString.length, 'chars');
 
-    // Warn if prompt is very large
-    if (fullPrompt.length > 50000) {
-        console.warn('[Humanize] Warning: Prompt is very large, may take a while or fail');
+    // Warn if still very large
+    if (estimatedTokens > 10000) {
+        console.warn('[Humanize] Warning: ~' + estimatedTokens + ' tokens is large, may be slow');
+        toastr.warning('Large message (~' + estimatedTokens + ' tokens), this may take a while...', 'Humanize');
     }
 
     try {
