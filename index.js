@@ -188,13 +188,23 @@ async function improveMessage(messageId) {
 
     console.log('[Humanize] Starting improvement...');
     console.log('[Humanize] Prompt length:', fullPrompt.length);
+    console.log('[Humanize] Message length:', originalContent.length);
+    console.log('[Humanize] Context length:', contextString.length);
+
+    // Warn if prompt is very large
+    if (fullPrompt.length > 50000) {
+        console.warn('[Humanize] Warning: Prompt is very large, may take a while or fail');
+    }
 
     try {
+        console.log('[Humanize] Calling generateRaw...');
         const improvedText = await generateRaw({ prompt: fullPrompt, quietToLoud: false });
+        console.log('[Humanize] generateRaw returned:', improvedText ? `${improvedText.length} chars` : 'null/undefined');
 
         toastr.clear();
 
         if (!improvedText || improvedText.trim() === '') {
+            console.error('[Humanize] Empty or null response received');
             toastr.error('Empty response received. Try reducing context depth.', 'Humanize');
             button.removeClass('disabled');
             return;
@@ -220,12 +230,13 @@ async function improveMessage(messageId) {
         }
 
         saveChatDebounced();
+        console.log('[Humanize] Message updated successfully');
 
         toastr.success('Message improved!', 'Humanize');
         button.removeClass('disabled');
 
     } catch (error) {
-        console.error('[Humanize] Error:', error);
+        console.error('[Humanize] Error caught:', error);
         toastr.clear();
         toastr.error('Error: ' + (error.message || 'Unknown error'), 'Humanize');
         button.removeClass('disabled');
