@@ -42,9 +42,6 @@ const defaultSettings = {
     prompt: ''
 };
 
-// Max characters for the entire prompt (roughly 8k tokens)
-const MAX_PROMPT_CHARS = 32000;
-
 // ============================================================================
 // LOGGING - Console + persistent toastr popups (click to dismiss)
 // ============================================================================
@@ -124,31 +121,17 @@ async function improveMessage(messageId) {
     // Get the prompt template
     const promptTemplate = extension_settings[settingsKey].prompt || DEFAULT_PROMPT;
 
-    // Calculate available space for context (total - template - message - buffer)
-    const templateSize = promptTemplate.replace('{{context}}', '').replace('{{message}}', '').length;
-    const messageSize = originalContent.length;
-    const availableForContext = MAX_PROMPT_CHARS - templateSize - messageSize - 500; // 500 char buffer
-
-    // Build chat context with size limit
+    // Build chat context
     const contextDepth = extension_settings[settingsKey].contextDepth || 3;
     const startIndex = Math.max(0, messageId - contextDepth);
     let contextMessages = [];
-    let contextSize = 0;
 
     for (let i = startIndex; i < messageId; i++) {
         const msg = chat[i];
         if (msg && msg.mes) {
             const name = msg.is_user ? 'User' : (msg.name || 'Character');
             const entry = `${name}: ${msg.mes}`;
-
-            // Check if adding this would exceed limit
-            if (contextSize + entry.length > availableForContext && availableForContext > 0) {
-                log('Context truncated to fit token limit', 'warn');
-                break;
-            }
-
             contextMessages.push(entry);
-            contextSize += entry.length + 2; // +2 for \n\n
         }
     }
 
@@ -165,14 +148,7 @@ async function improveMessage(messageId) {
     const button = $(`.humanize-btn[data-message-id="${messageId}"]`);
     button.addClass('disabled');
 
-    const estimatedTokens = Math.ceil(fullPrompt.length / 4);
     log('Starting improvement...');
-    log(`Prompt: ${fullPrompt.length} chars (~${estimatedTokens} tokens)`);
-
-    // Warn if very large
-    if (estimatedTokens > 10000) {
-        log(`~${estimatedTokens} tokens is large, may be slow`, 'warn');
-    }
 
     try {
         log('Calling API...');
