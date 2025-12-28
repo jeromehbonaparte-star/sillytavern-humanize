@@ -12,27 +12,6 @@
 
             <hr class="sysHR">
 
-            <!-- Pack Selector -->
-            <div style="margin-top: 10px;">
-                <label for="humanize_pack_select">
-                    <span>Improvement Pack</span>
-                </label>
-                <small class="notes">Select which pack to apply (main button uses this)</small>
-                <select id="humanize_pack_select" class="text_pole">
-                    <option value="storyLogic">1. Story & Logic</option>
-                    <option value="proseStyle">2. Prose & Style</option>
-                    <option value="polishEndings">3. Polish & Endings</option>
-                    <option value="humanize">4. Humanize</option>
-                </select>
-            </div>
-
-            <!-- Pack Description -->
-            <div style="margin-top: 5px;">
-                <small id="humanize_pack_description" class="notes" style="font-style: italic;"></small>
-            </div>
-
-            <hr class="sysHR">
-
             <!-- Context Depth -->
             <div style="margin-top: 10px;">
                 <label for="humanize_context_depth">
@@ -47,19 +26,17 @@
             <!-- Prompt Editor -->
             <div class="humanize-prompt-section" style="margin-top: 10px;">
                 <label for="humanize_prompt">
-                    <span>Prompt for Selected Pack</span>
+                    <span>Improvement Prompt</span>
                 </label>
                 <small class="notes">
                     Use <code>{{message}}</code> for original message, <code>{{context}}</code> for chat history.
-                    Each pack has its own customizable prompt.
                 </small>
                 <textarea id="humanize_prompt" class="text_pole textarea_compact" rows="12" placeholder="Enter your improvement prompt..."></textarea>
             </div>
 
-            <!-- Buttons -->
-            <div style="margin-top: 10px; display: flex; gap: 10px;">
-                <input type="button" id="humanize_restore_default" class="menu_button" value="Restore This Prompt" title="Restore default prompt for the currently selected pack" />
-                <input type="button" id="humanize_restore_all" class="menu_button" value="Restore All Defaults" title="Restore all prompts and settings to defaults" />
+            <!-- Restore Button -->
+            <div style="margin-top: 10px;">
+                <input type="button" id="humanize_restore_default" class="menu_button" value="Restore Default Prompt" />
             </div>
 
             <hr class="sysHR">
@@ -68,14 +45,17 @@
             <div style="margin-top: 10px;">
                 <small class="notes">
                     <b>How to use:</b><br>
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Main button - Apply selected pack<br>
-                    <i class="fa-solid fa-caret-down"></i> Dropdown - Choose pack or Run All<br>
-                    <i class="fa-solid fa-forward"></i> <b>Run All</b> - Apply all 4 packs in order (click toast to cancel)<br><br>
-                    <b>Improvement Packs (4 API calls instead of 9):</b><br>
-                    1. <i class="fa-solid fa-diagram-project"></i> <b>Story & Logic</b> - Plot coherence + NPC perception<br>
-                    2. <i class="fa-solid fa-pen-fancy"></i> <b>Prose & Style</b> - Show/tell + dialogue + prose + pacing<br>
-                    3. <i class="fa-solid fa-flag-checkered"></i> <b>Polish & Endings</b> - Pitfalls + chapter endings<br>
-                    4. <i class="fa-solid fa-wand-magic-sparkles"></i> <b>Humanize</b> - Final natural dialogue pass
+                    Click the <i class="fa-solid fa-wand-magic-sparkles"></i> wand button on any AI message to improve it.<br><br>
+                    <b>All improvements in ONE click:</b><br>
+                    1. Story & Logic - Fix plot coherence<br>
+                    2. NPC Perception - Stop telepathic NPCs<br>
+                    3. Show Don't Tell - Sensory details<br>
+                    4. Dialogue Polish - Subtext & voices<br>
+                    5. Prose Craft - Rhythm & economy<br>
+                    6. Pacing - Scene tempo<br>
+                    7. Pitfall Fixes - Anti-patterns<br>
+                    8. Strong Endings - Better hooks<br>
+                    9. Humanize - Natural dialogue
                 </small>
             </div>
         </div>
