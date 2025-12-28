@@ -50,13 +50,10 @@ const defaultSettings = {
 const MAX_PROMPT_CHARS = 32000;
 
 // ============================================================================
-// LOGGING - Writes to both console and UI panel
+// LOGGING - Console + persistent toastr popups (click to dismiss)
 // ============================================================================
 
 function log(message, type = 'info') {
-    const timestamp = new Date().toLocaleTimeString();
-    const prefix = `[${timestamp}]`;
-
     // Console logging
     if (type === 'error') {
         console.error('[Humanize]', message);
@@ -66,18 +63,18 @@ function log(message, type = 'info') {
         console.log('[Humanize]', message);
     }
 
-    // UI logging
-    const logPanel = $('#humanize_log');
-    if (logPanel.length) {
-        const color = type === 'error' ? '#ff6b6b' : type === 'warn' ? '#ffd93d' : type === 'success' ? '#6bcb77' : '#ccc';
-        logPanel.append(`<div style="color: ${color}">${prefix} ${message}</div>`);
-        logPanel.scrollTop(logPanel[0].scrollHeight);
-    }
-}
+    // Persistent toastr - stays until clicked
+    const toastrOptions = { timeOut: 0, extendedTimeOut: 0, closeButton: true, tapToDismiss: true };
 
-function clearLog() {
-    $('#humanize_log').empty();
-    log('Log cleared', 'info');
+    if (type === 'error') {
+        toastr.error(message, 'Humanize', toastrOptions);
+    } else if (type === 'warn') {
+        toastr.warning(message, 'Humanize', toastrOptions);
+    } else if (type === 'success') {
+        toastr.success(message, 'Humanize', toastrOptions);
+    } else {
+        toastr.info(message, 'Humanize', toastrOptions);
+    }
 }
 
 // ============================================================================
@@ -168,9 +165,6 @@ async function improveMessage(messageId) {
         .replace('{{context}}', contextString)
         .replace('{{message}}', originalContent);
 
-    // Show processing toast
-    toastr.info('Improving message...', 'Humanize', { timeOut: 0, extendedTimeOut: 0 });
-
     // Disable button during processing
     const button = $(`.humanize-btn[data-message-id="${messageId}"]`);
     button.addClass('disabled');
@@ -178,28 +172,23 @@ async function improveMessage(messageId) {
     const estimatedTokens = Math.ceil(fullPrompt.length / 4);
     log('Starting improvement...');
     log(`Prompt: ${fullPrompt.length} chars (~${estimatedTokens} tokens)`);
-    log(`Message: ${originalContent.length} chars`);
-    log(`Context: ${contextString.length} chars`);
 
-    // Warn if still very large
+    // Warn if very large
     if (estimatedTokens > 10000) {
-        log(`Warning: ~${estimatedTokens} tokens is large, may be slow`, 'warn');
-        toastr.warning('Large message (~' + estimatedTokens + ' tokens), this may take a while...', 'Humanize');
+        log(`~${estimatedTokens} tokens is large, may be slow`, 'warn');
     }
 
     try {
         log('Calling API...');
         const improvedText = await generateRaw({ prompt: fullPrompt, quietToLoud: false });
-        log(`API returned: ${improvedText ? improvedText.length + ' chars' : 'null/undefined'}`, improvedText ? 'info' : 'error');
-
-        toastr.clear();
 
         if (!improvedText || improvedText.trim() === '') {
-            log('Empty or null response received', 'error');
-            toastr.error('Empty response received. Try reducing context depth.', 'Humanize');
+            log('Empty response. Try reducing context depth.', 'error');
             button.removeClass('disabled');
             return;
         }
+
+        log(`API returned ${improvedText.length} chars`);
 
         // Update the message in chat
         chat[messageId].mes = improvedText;
@@ -221,15 +210,11 @@ async function improveMessage(messageId) {
         }
 
         saveChatDebounced();
-        log('Message improved successfully!', 'success');
-
-        toastr.success('Message improved!', 'Humanize');
+        log('Message improved!', 'success');
         button.removeClass('disabled');
 
     } catch (error) {
         log(`Error: ${error.message || error}`, 'error');
-        toastr.clear();
-        toastr.error('Error: ' + (error.message || 'Unknown error'), 'Humanize');
         button.removeClass('disabled');
     }
 }
@@ -326,7 +311,6 @@ jQuery(async () => {
             saveSettingsDebounced();
         });
         $('#humanize_restore_default').on('click', restoreDefaultPrompt);
-        $('#humanize_clear_log').on('click', clearLog);
 
         // Register event listeners
         eventSource.on(event_types.CHAT_CHANGED, () => {
