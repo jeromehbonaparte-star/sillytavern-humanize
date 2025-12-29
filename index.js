@@ -40,6 +40,7 @@ Rewrite applying ALL fixes. Output ONLY the improved message.`;
 
 const defaultSettings = {
     enabled: true,
+    autoHumanize: false,
     contextDepth: 3,
     prompt: ''
 };
@@ -87,8 +88,13 @@ function loadSettings() {
         extension_settings[settingsKey].contextDepth = defaultSettings.contextDepth;
     }
 
+    if (extension_settings[settingsKey].autoHumanize === undefined) {
+        extension_settings[settingsKey].autoHumanize = defaultSettings.autoHumanize;
+    }
+
     // Update UI
     $('#humanize_enabled').prop('checked', extension_settings[settingsKey].enabled);
+    $('#humanize_auto').prop('checked', extension_settings[settingsKey].autoHumanize);
     $('#humanize_context_depth').val(extension_settings[settingsKey].contextDepth);
     $('#humanize_prompt').val(extension_settings[settingsKey].prompt || DEFAULT_PROMPT);
 }
@@ -254,6 +260,16 @@ function onEnabledChange() {
     }
 }
 
+function onAutoHumanizeChange() {
+    const autoHumanize = $('#humanize_auto').prop('checked');
+    extension_settings[settingsKey].autoHumanize = autoHumanize;
+    saveSettingsDebounced();
+
+    if (autoHumanize) {
+        toastr.info('New AI messages will be automatically humanized', 'Humanize');
+    }
+}
+
 function onPromptChange() {
     extension_settings[settingsKey].prompt = $('#humanize_prompt').val();
     saveSettingsDebounced();
@@ -279,6 +295,7 @@ jQuery(async () => {
 
         // Event handlers
         $('#humanize_enabled').on('change', onEnabledChange);
+        $('#humanize_auto').on('change', onAutoHumanizeChange);
         $('#humanize_prompt').on('input', onPromptChange);
         $('#humanize_context_depth').on('input', function() {
             extension_settings[settingsKey].contextDepth = parseInt($(this).val()) || 0;
@@ -296,7 +313,15 @@ jQuery(async () => {
         });
 
         eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, (messageId) => {
-            setTimeout(() => addImproveButton(messageId), 100);
+            setTimeout(() => {
+                addImproveButton(messageId);
+
+                // Auto-humanize if enabled
+                if (extension_settings[settingsKey]?.autoHumanize && extension_settings[settingsKey]?.enabled) {
+                    log('Auto-humanizing message...');
+                    improveMessage(messageId);
+                }
+            }, 100);
         });
 
         setTimeout(addButtonsToAllMessages, 1000);
