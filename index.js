@@ -18,6 +18,7 @@ const settingsKey = 'humanize';
 
 // Track new messages that should be auto-humanized
 const newMessageIds = new Set();
+let isLoadingChat = true; // Start true, set false after initial load
 
 // ============================================================================
 // COMBINED IMPROVEMENT PROMPT - All rules in one API call
@@ -310,12 +311,23 @@ jQuery(async () => {
 
         // Register event listeners
         eventSource.on(event_types.CHAT_CHANGED, () => {
+            // Clear tracking and mark as loading
+            newMessageIds.clear();
+            isLoadingChat = true;
+
             setTimeout(addButtonsToAllMessages, 500);
+
+            // After chat finishes loading, allow tracking new messages
+            setTimeout(() => {
+                isLoadingChat = false;
+            }, 2000);
         });
 
         eventSource.on(event_types.MESSAGE_RECEIVED, (messageId) => {
-            // Track this as a new message for auto-humanize
-            newMessageIds.add(messageId);
+            // Only track as new if not during initial chat load
+            if (!isLoadingChat) {
+                newMessageIds.add(messageId);
+            }
             setTimeout(() => addImproveButton(messageId), 300);
         });
 
@@ -354,6 +366,11 @@ jQuery(async () => {
         });
 
         setTimeout(addButtonsToAllMessages, 1000);
+
+        // Allow tracking new messages after initial load
+        setTimeout(() => {
+            isLoadingChat = false;
+        }, 2000);
 
         log('Extension loaded successfully', 'success');
     } catch (error) {
