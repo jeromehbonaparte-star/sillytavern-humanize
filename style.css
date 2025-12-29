@@ -32,6 +32,40 @@
     pointer-events: none;
 }
 
+/* Auto-humanize processing state */
+.humanize-processing {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.humanize-processing.humanize-ready {
+    opacity: 1;
+}
+
+/* Loading indicator for auto-humanize */
+.humanize-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    color: var(--SmartThemeEmColor, #a865e3);
+    font-style: italic;
+}
+
+.humanize-loading::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--SmartThemeBorderColor, #333);
+    border-top-color: var(--SmartThemeEmColor, #a865e3);
+    border-radius: 50%;
+    animation: humanize-spin 1s linear infinite;
+}
+
+@keyframes humanize-spin {
+    to { transform: rotate(360deg); }
+}
+
 /* Utility */
 .sysHR {
     margin: 10px 0;

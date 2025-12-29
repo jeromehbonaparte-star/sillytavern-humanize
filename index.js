@@ -109,21 +109,21 @@ async function improveMessage(messageId) {
 
     if (!chat || !chat[messageId]) {
         toastr.error('Message not found', 'Humanize');
-        return;
+        return false;
     }
 
     const message = chat[messageId];
 
     if (message.is_user) {
         toastr.warning('Can only improve AI messages', 'Humanize');
-        return;
+        return false;
     }
 
     const originalContent = message.mes;
 
     if (!originalContent || originalContent.trim() === '') {
         toastr.warning('Message is empty', 'Humanize');
-        return;
+        return false;
     }
 
     // Get the prompt template
@@ -165,7 +165,7 @@ async function improveMessage(messageId) {
         if (!improvedText || improvedText.trim() === '') {
             log('Empty response. Try reducing context depth.', 'error');
             button.removeClass('disabled');
-            return;
+            return false;
         }
 
         log(`API returned ${improvedText.length} chars`);
@@ -192,10 +192,12 @@ async function improveMessage(messageId) {
         saveChatDebounced();
         log('Message improved!', 'success');
         button.removeClass('disabled');
+        return true;
 
     } catch (error) {
         log(`Error: ${error.message || error}`, 'error');
         button.removeClass('disabled');
+        return false;
     }
 }
 
@@ -313,13 +315,31 @@ jQuery(async () => {
         });
 
         eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, (messageId) => {
-            setTimeout(() => {
+            setTimeout(async () => {
                 addImproveButton(messageId);
 
                 // Auto-humanize if enabled
                 if (extension_settings[settingsKey]?.autoHumanize && extension_settings[settingsKey]?.enabled) {
+                    const messageBlock = $(`.mes[mesid="${messageId}"]`);
+
+                    // Hide the message immediately
+                    messageBlock.addClass('humanize-processing');
+
+                    // Add loading indicator after the message
+                    const loadingIndicator = $('<div class="humanize-loading">Humanizing message...</div>');
+                    messageBlock.after(loadingIndicator);
+
                     log('Auto-humanizing message...');
-                    improveMessage(messageId);
+
+                    try {
+                        // Wait for humanization to complete
+                        await improveMessage(messageId);
+                    } finally {
+                        // Always remove loading and reveal message (even on failure)
+                        loadingIndicator.remove();
+                        messageBlock.addClass('humanize-ready');
+                        messageBlock.removeClass('humanize-processing');
+                    }
                 }
             }, 100);
         });
