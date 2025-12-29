@@ -341,26 +341,8 @@ jQuery(async () => {
                     // Remove from tracking set
                     newMessageIds.delete(messageId);
 
-                    const messageBlock = $(`.mes[mesid="${messageId}"]`);
-
-                    // Hide the message immediately
-                    messageBlock.addClass('humanize-processing');
-
-                    // Add loading indicator after the message
-                    const loadingIndicator = $('<div class="humanize-loading">Humanizing message...</div>');
-                    messageBlock.after(loadingIndicator);
-
                     log('Auto-humanizing message...');
-
-                    try {
-                        // Wait for humanization to complete
-                        await improveMessage(messageId);
-                    } finally {
-                        // Always remove loading and reveal message (even on failure)
-                        loadingIndicator.remove();
-                        messageBlock.addClass('humanize-ready');
-                        messageBlock.removeClass('humanize-processing');
-                    }
+                    await improveMessage(messageId);
                 }
             }, 100);
         });
