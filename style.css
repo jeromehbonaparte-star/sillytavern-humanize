@@ -32,14 +32,14 @@
     pointer-events: none;
 }
 
-/* Auto-humanize processing state */
-.humanize-processing {
-    opacity: 0;
+/* Auto-humanize processing state - only affect specific message */
+.mes.humanize-processing {
+    opacity: 0 !important;
     transition: opacity 0.3s ease;
 }
 
-.humanize-processing.humanize-ready {
-    opacity: 1;
+.mes.humanize-processing.humanize-ready {
+    opacity: 1 !important;
 }
 
 /* Loading indicator for auto-humanize */
