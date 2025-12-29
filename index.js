@@ -16,6 +16,9 @@ import {
 const extensionName = 'third-party/sillytavern-humanize';
 const settingsKey = 'humanize';
 
+// Track new messages that should be auto-humanized
+const newMessageIds = new Set();
+
 // ============================================================================
 // COMBINED IMPROVEMENT PROMPT - All rules in one API call
 // ============================================================================
@@ -311,6 +314,8 @@ jQuery(async () => {
         });
 
         eventSource.on(event_types.MESSAGE_RECEIVED, (messageId) => {
+            // Track this as a new message for auto-humanize
+            newMessageIds.add(messageId);
             setTimeout(() => addImproveButton(messageId), 300);
         });
 
@@ -318,8 +323,12 @@ jQuery(async () => {
             setTimeout(async () => {
                 addImproveButton(messageId);
 
-                // Auto-humanize if enabled
-                if (extension_settings[settingsKey]?.autoHumanize && extension_settings[settingsKey]?.enabled) {
+                // Auto-humanize only NEW messages (not old ones when loading chat)
+                const isNewMessage = newMessageIds.has(messageId);
+                if (isNewMessage && extension_settings[settingsKey]?.autoHumanize && extension_settings[settingsKey]?.enabled) {
+                    // Remove from tracking set
+                    newMessageIds.delete(messageId);
+
                     const messageBlock = $(`.mes[mesid="${messageId}"]`);
 
                     // Hide the message immediately
